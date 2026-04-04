@@ -1,0 +1,8 @@
+streamlit==1.56.0
+pandas==3.0.2
+meteostat==2.1.4
+openpyxl==3.1.5
+plotly==6.6.0
+requests==2.33.1
+lxml==6.0.2
+watchdog
