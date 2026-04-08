@@ -1,0 +1,443 @@
+/* Bank of Thailand Design System - Applied to Streamlit */
+/* Based on official corporate identity guidelines */
+
+/* Import IBM Plex Sans and Sarabun fonts */
+/* Note: these imports are removed at runtime unless `allow_remote_css_imports = true` in Streamlit secrets. */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+/* Import Material Icons (both versions for compatibility) */
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+/* CSS Variables - Bank of Thailand Design System */
+:root {
+  /* Colors - Primary */
+  --color-navy-blue: #003366;
+  --color-light-blue: #4A90E2;
+  --color-grey: #6B7280;
+  
+  /* Colors - Extended */
+  --color-dark-navy: #001F3F;
+  --color-sky-blue: #E3F2FD;
+  --color-charcoal: #374151;
+  --color-light-grey: #F3F4F6;
+  --color-white: #FFFFFF;
+  
+  /* Colors - Semantic */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+  
+  /* Typography */
+  --font-primary: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-thai: 'Sarabun', 'Noto Sans Thai', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  
+  /* Spacing (8px grid) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  
+  /* Border Radius */
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  /* Transitions */
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+}
+
+/* Global styles scoped to Streamlit root to avoid excessive style recalculation. */
+html, body, [data-testid="stAppViewContainer"], [data-testid="stAppViewContainer"] * {
+  font-family: var(--font-thai);
+}
+
+body {
+  background-color: var(--color-white) !important;
+  color: var(--color-charcoal) !important;
+}
+
+/* Main container */
+.main {
+  background-color: var(--color-white);
+  padding: var(--space-8) var(--space-6);
+}
+
+/* Header Styling - Bank of Thailand Standard (Light Theme) */
+.main > div:first-child {
+  background: var(--color-white) !important;
+  padding: var(--space-8) var(--space-6);
+  margin: calc(-1 * var(--space-8)) calc(-1 * var(--space-6)) var(--space-8);
+  border-bottom: 2px solid var(--color-light-grey);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Typography - Headers */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-thai) !important;
+  font-weight: 600 !important;
+  color: var(--color-navy-blue) !important;
+  letter-spacing: -0.025em;
+}
+
+/* Main title */
+h1 {
+  font-size: 2.5rem !important;
+  color: var(--color-navy-blue) !important;
+  font-weight: 700 !important;
+  margin-bottom: var(--space-2) !important;
+}
+
+/* Subtitle */
+.main > div:first-child h2 {
+  color: var(--color-light-blue) !important;
+  font-size: 1.75rem !important;
+  font-weight: 500 !important;
+}
+
+/* Section headers */
+h3 {
+  font-size: 1.5rem !important;
+  margin-top: var(--space-8) !important;
+  margin-bottom: var(--space-4) !important;
+  padding-bottom: var(--space-3);
+  border-bottom: 3px solid var(--color-light-blue);
+  display: inline-block;
+}
+
+/* Description text */
+.main > div:first-child p,
+.main > div:first-child .element-container {
+  color: var(--color-grey) !important;
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+/* Buttons - Primary (Navy Blue) */
+.stButton > button {
+  background: linear-gradient(135deg, var(--color-navy-blue) 0%, var(--color-dark-navy) 100%) !important;
+  color: var(--color-white) !important;
+  font-family: var(--font-thai) !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  padding: var(--space-3) var(--space-8) !important;
+  border-radius: var(--radius-md) !important;
+  border: none !important;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base) !important;
+  text-transform: none !important;
+  letter-spacing: 0.025em;
+}
+
+.stButton > button:hover {
+  background: linear-gradient(135deg, var(--color-dark-navy) 0%, #000d1a 100%) !important;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.stButton > button:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Download Buttons */
+.stDownloadButton > button {
+  background: linear-gradient(135deg, var(--color-light-blue) 0%, #357ABD 100%) !important;
+  color: var(--color-white) !important;
+  font-weight: 600 !important;
+  padding: var(--space-3) var(--space-6) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base) !important;
+}
+
+.stDownloadButton > button:hover {
+  background: linear-gradient(135deg, #357ABD 0%, #2868a6 100%) !important;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* Input Fields */
+.stTextInput > div > div > input,
+.stDateInput > div > div > input,
+.stSelectbox > div > div > input {
+  border: 2px solid #D1D5DB !important;
+  border-radius: var(--radius-md) !important;
+  padding: var(--space-3) var(--space-4) !important;
+  font-size: 1rem !important;
+  color: var(--color-charcoal) !important;
+  background: var(--color-white) !important;
+  transition: all var(--transition-base) !important;
+  font-family: var(--font-thai) !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stDateInput > div > div > input:focus {
+  border-color: var(--color-light-blue) !important;
+  outline: 2px solid var(--color-sky-blue) !important;
+  outline-offset: 0 !important;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1) !important;
+}
+
+/* Checkboxes */
+.stCheckbox {
+  font-family: var(--font-thai) !important;
+  font-weight: 500 !important;
+  color: var(--color-charcoal) !important;
+}
+
+.stCheckbox > label {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-base);
+}
+
+.stCheckbox > label:hover {
+  background-color: var(--color-sky-blue);
+}
+
+/* Region color swatches enhancement */
+.stCheckbox div[style*="background-color"] {
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Cards and Containers */
+.element-container,
+.stMarkdown,
+div[data-testid="stExpander"] {
+  font-family: var(--font-thai) !important;
+}
+
+/* Info, Success, Warning, Error messages */
+.stAlert {
+  border-radius: var(--radius-lg) !important;
+  border: none !important;
+  box-shadow: var(--shadow-base);
+  font-family: var(--font-thai) !important;
+  padding: var(--space-4) var(--space-6) !important;
+}
+
+div[data-baseweb="notification"][kind="info"] {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  border-left: 4px solid var(--color-info) !important;
+}
+
+div[data-baseweb="notification"][kind="success"] {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  border-left: 4px solid var(--color-success) !important;
+}
+
+div[data-baseweb="notification"][kind="warning"] {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+  border-left: 4px solid var(--color-warning) !important;
+}
+
+div[data-baseweb="notification"][kind="error"] {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  border-left: 4px solid var(--color-error) !important;
+}
+
+/* Dataframe Tables */
+.dataframe {
+  font-family: var(--font-mono) !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+  box-shadow: var(--shadow-base) !important;
+  border: 1px solid #E5E7EB !important;
+}
+
+.dataframe thead th {
+  background: linear-gradient(135deg, var(--color-navy-blue) 0%, var(--color-dark-navy) 100%) !important;
+  color: var(--color-white) !important;
+  font-weight: 600 !important;
+  padding: var(--space-4) !important;
+  text-align: left !important;
+  font-family: var(--font-thai) !important;
+}
+
+.dataframe tbody tr:nth-child(even) {
+  background-color: var(--color-light-grey) !important;
+}
+
+.dataframe tbody tr:hover {
+  background-color: var(--color-sky-blue) !important;
+  transition: background-color var(--transition-base);
+}
+
+.dataframe tbody td {
+  padding: var(--space-3) var(--space-4) !important;
+  border-bottom: 1px solid #E5E7EB !important;
+}
+
+/* Expander */
+div[data-testid="stExpander"] {
+  background-color: var(--color-white) !important;
+  border: 2px solid var(--color-light-grey) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-sm);
+  margin: var(--space-4) 0 !important;
+  transition: all var(--transition-base);
+}
+
+div[data-testid="stExpander"]:hover {
+  border-color: var(--color-light-blue) !important;
+  box-shadow: var(--shadow-md);
+}
+
+div[data-testid="stExpander"] summary {
+  font-weight: 600 !important;
+  color: var(--color-navy-blue) !important;
+  padding: var(--space-4) !important;
+  font-size: 1.05rem !important;
+}
+
+/* Progress Bar */
+.stProgress > div > div > div {
+  background: linear-gradient(90deg, var(--color-light-blue) 0%, var(--color-navy-blue) 100%) !important;
+  border-radius: var(--radius-md) !important;
+  height: 12px !important;
+}
+
+.stProgress > div > div {
+  background-color: var(--color-light-grey) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+/* Plotly Charts Enhancement */
+.js-plotly-plot {
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-base) !important;
+  background: var(--color-white) !important;
+  padding: var(--space-4) !important;
+  margin: var(--space-6) 0 !important;
+  border: 1px solid #E5E7EB;
+}
+
+/* Sidebar (if used) */
+section[data-testid="stSidebar"] {
+  background: linear-gradient(180deg, var(--color-navy-blue) 0%, var(--color-dark-navy) 100%) !important;
+  padding: var(--space-6) !important;
+}
+
+section[data-testid="stSidebar"] * {
+  color: var(--color-white) !important;
+}
+
+/* Logo container enhancement */
+.main img {
+  filter: drop-shadow(var(--shadow-sm));
+  transition: transform var(--transition-base);
+}
+
+.main img:hover {
+  transform: scale(1.05);
+}
+
+/* Footer */
+.main > div:last-child {
+  margin-top: var(--space-12);
+  padding-top: var(--space-8);
+  border-top: 2px solid var(--color-light-grey);
+}
+
+/* Columns spacing */
+div[data-testid="column"] {
+  padding: 0 var(--space-2) !important;
+}
+
+/* Material Icons/Symbols Support */
+/* Ensure Material Icons are loaded and styled properly */
+.material-icons,
+.material-symbols-outlined,
+[data-testid="stIconMaterial"],
+span[aria-label$=" icon"][role="img"],
+span[data-icon],
+[class*="material"] {
+  font-family: 'Material Symbols Outlined', 'Material Icons' !important;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga' !important;
+}
+
+/* Material Icons Enhancement */
+span[data-testid="stMarkdownContainer"] span[class*="material"] {
+  color: var(--color-light-blue);
+  vertical-align: middle;
+  margin-right: var(--space-1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem !important;
+  }
+  
+  h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  h3 {
+    font-size: 1.25rem !important;
+  }
+  
+  .main {
+    padding: var(--space-4) var(--space-3);
+  }
+}
+
+/* Subtle animation for page load */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.main > div {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Accessibility - Focus states */
+*:focus-visible {
+  outline: 2px solid var(--color-light-blue) !important;
+  outline-offset: 2px !important;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,5 +1,6 @@
 import ssl
 from datetime import date
+from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
@@ -39,25 +40,38 @@ def validate_date_range(start_date: date, end_date: date):
 # --- App setup ---
 st.set_page_config(page_title="Thailand Meteorological Analyzer", page_icon=":material/cloud:", layout="wide")
 
-# --- Header layout ---
-header_col1, header_col2 = st.columns([5, 1])
+# Load custom CSS (Bank of Thailand Design System)
+style_path = Path(".streamlit/style.css")
+if style_path.exists():
+    css_content = style_path.read_text(encoding="utf-8")
+    # Allow disabling remote font/icon imports in restricted environments.
+    if not st.secrets.get("allow_remote_css_imports", False):
+        css_content = "\n".join(line for line in css_content.splitlines() if not line.strip().startswith("@import"))
+    st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
+else:
+    st.warning("ไม่พบไฟล์สไตล์ .streamlit/style.css ระบบจะใช้ธีมเริ่มต้นของ Streamlit")
 
-with header_col1:
-    st.title(":material/partly_cloudy_day: ระบบรวบรวมและวิเคราะห์ข้อมูลอุตุนิยมวิทยา")
-    st.header("ประเทศไทย")
+# --- Header layout with Bank of Thailand styling ---
+header_container = st.container()
 
-with header_col2:
-    logo_col1, logo_col2 = st.columns(2)
-    with logo_col1:
-        st.image("assets/TMD.png", use_container_width=True)
-    with logo_col2:
-        st.image("assets/NOAA.png", use_container_width=True)
-
-st.markdown(
-    "ระบบอัตโนมัติสำหรับสืบค้นข้อมูลจากสถานีตรวจอากาศกรมอุตุนิยมวิทยาโดยใช้ Meteostat API "
-    "พร้อมผนวกรวมดัชนีชี้วัดปรากฏการณ์เอลนีโญ-ลานีญา (ONI) จาก NOAA ผ่านกระบวนการทำความสะอาดข้อมูล "
-    "(Data Cleaning) และแสดงผลในรูปแบบ Visualizations เพื่อสนับสนุนการตัดสินใจ"
-)
+with header_container:
+    header_col1, header_col2 = st.columns([6, 1])
+    
+    with header_col1:
+        st.title(":material/partly_cloudy_day: ระบบรวบรวมและวิเคราะห์ข้อมูลอุตุนิยมวิทยา")
+        st.header("ประเทศไทย")
+        st.markdown(
+            "ระบบอัตโนมัติสำหรับสืบค้นข้อมูลจากสถานีตรวจอากาศกรมอุตุนิยมวิทยาโดยใช้ Meteostat API "
+            "พร้อมผนวกรวมดัชนีชี้วัดปรากฏการณ์เอลนีโญ-ลานีญา (ONI) จาก NOAA ผ่านกระบวนการทำความสะอาดข้อมูล "
+            "(Data Cleaning) และแสดงผลในรูปแบบ Visualizations เพื่อสนับสนุนการตัดสินใจ"
+        )
+    
+    with header_col2:
+        logo_col1, logo_col2 = st.columns(2)
+        with logo_col1:
+            st.image("assets/TMD.png", use_container_width=True)
+        with logo_col2:
+            st.image("assets/NOAA.png", use_container_width=True)
 
 # --- Station data loading ---
 try:
