@@ -5,20 +5,9 @@ from typing import Dict, List
 import streamlit as st
 
 
-def _map_icon(size: int = 16) -> str:
-    return (
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" '
-        'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
-        'stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;">'
-        '<path d="M3 6 9 3l6 3 6-3v15l-6 3-6-3-6 3V6Z" />'
-        '<path d="M9 3v15M15 6v15" />'
-        '</svg>'
-    )
-
-
 def render_region_selector(region_colors: Dict[str, str]) -> List[str]:
     all_regions = list(region_colors.keys())
-    st.markdown(f"{_map_icon()} เลือกภูมิภาคที่ต้องการ", unsafe_allow_html=True)
+    st.markdown("เลือกภูมิภาคที่ต้องการ")
 
     region_cols = st.columns(3)
     region_selected_map = {}

@@ -14,36 +14,6 @@ from weather_fetcher import REGION_COLORS, fetch_oni_data, fetch_stations_parall
 
 MIN_STATION_THRESHOLD = 3
 
-ICON_PATHS = {
-    "cloud": '<path d="M7 18a4 4 0 0 1 0-8 5.5 5.5 0 0 1 10.7-1.6A4.5 4.5 0 1 1 18.5 18H7Z" />',
-    "settings": '<circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 0 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5h.1a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 0 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1Z" />',
-    "calendar": '<rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 11h18" />',
-    "check": '<path d="M20 6 9 17l-5-5" />',
-    "map": '<path d="M3 6 9 3l6 3 6-3v15l-6 3-6-3-6 3V6Z" /><path d="M9 3v15M15 6v15" />',
-    "chart": '<path d="M3 3v18h18" /><path d="m7 14 4-4 3 3 5-6" />',
-    "table": '<rect x="3" y="4" width="18" height="16" rx="1" /><path d="M3 10h18M9 4v16M15 4v16" />',
-    "book": '<path d="M4 5a3 3 0 0 1 3-3h13v16H7a3 3 0 0 0-3 3V5Z" /><path d="M7 2v16" />',
-    "download": '<path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" />',
-    "search": '<circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />',
-}
-
-
-def icon_svg(name: str, size: int = 18) -> str:
-    path_data = ICON_PATHS.get(name, "")
-    return (
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" '
-        f'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
-        f'stroke-linecap="round" stroke-linejoin="round" '
-        f'style="vertical-align:middle;">{path_data}</svg>'
-    )
-
-
-def section_title(icon_name: str, title: str) -> None:
-    st.markdown(
-        f"<h3 style='display:flex;align-items:center;gap:8px;'>{icon_svg(icon_name, 20)}<span>{title}</span></h3>",
-        unsafe_allow_html=True,
-    )
-
 # Bypass macOS Python SSL certificate verification issue globally.
 if hasattr(ssl, "_create_unverified_context"):
     ssl._create_default_https_context = ssl._create_unverified_context
@@ -51,12 +21,12 @@ if hasattr(ssl, "_create_unverified_context"):
 
 def validate_date_range(start_date: date, end_date: date):
     if start_date > end_date:
-        st.error("ข้อผิดพลาด: วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด")
+        st.error("วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด")
         return False, end_date
 
     today = date.today()
     if start_date > today:
-        st.error("ข้อผิดพลาด: วันที่เริ่มต้นต้องไม่เป็นวันในอนาคต")
+        st.error("วันที่เริ่มต้นต้องไม่เป็นวันในอนาคต")
         return False, end_date
 
     query_end_date = end_date
@@ -68,7 +38,7 @@ def validate_date_range(start_date: date, end_date: date):
 
 
 # --- App setup ---
-st.set_page_config(page_title="Thailand Meteorological Analyzer", page_icon="assets/TMD.png", layout="wide")
+st.set_page_config(page_title="Thailand Meteorological Analyzer", page_icon="☁️", layout="wide")
 
 # Load custom CSS (Bank of Thailand Design System)
 style_path = Path(".streamlit/style.css")
@@ -88,10 +58,7 @@ with header_container:
     header_col1, header_col2 = st.columns([6, 1])
     
     with header_col1:
-        st.markdown(
-            f"<h1 style='display:flex;align-items:center;gap:10px;margin-bottom:0;'>{icon_svg('cloud', 28)}<span>ระบบรวบรวมและวิเคราะห์ข้อมูลอุตุนิยมวิทยา</span></h1>",
-            unsafe_allow_html=True,
-        )
+        st.title("ระบบรวบรวมและวิเคราะห์ข้อมูลอุตุนิยมวิทยา")
         st.header("ประเทศไทย")
         st.markdown(
             "ระบบอัตโนมัติสำหรับสืบค้นข้อมูลจากสถานีตรวจอากาศกรมอุตุนิยมวิทยาโดยใช้ Meteostat API "
@@ -115,33 +82,30 @@ except Exception as e:
 
 # --- User inputs ---
 with st.container():
-    section_title("settings", "กำหนดภูมิภาคและช่วงเวลาการสืบค้นข้อมูล")
+    st.markdown("### กำหนดภูมิภาคและช่วงเวลาการสืบค้นข้อมูล")
     selected_regions = render_region_selector(REGION_COLORS)
 
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown(f"{icon_svg('calendar', 16)} วันที่เริ่มต้น", unsafe_allow_html=True)
         start_date = st.date_input(
             "วันที่เริ่มต้น",
             value=date(2005, 1, 1),
             min_value=date(1950, 1, 1),
             max_value=date.today(),
-            label_visibility="collapsed",
         )
     with col2:
-        st.markdown(f"{icon_svg('calendar', 16)} วันที่สิ้นสุด", unsafe_allow_html=True)
-        end_date = st.date_input("วันที่สิ้นสุด", date.today(), label_visibility="collapsed")
+        end_date = st.date_input("วันที่สิ้นสุด", date.today())
 
 wmo_stations = {k: v for k, v in all_stations.items() if v["region"] in selected_regions}
 
 # --- Execute processing ---
 if st.button("ประมวลผลและทำความสะอาดข้อมูล", type="primary", use_container_width=True):
     if not selected_regions:
-        st.error("ข้อผิดพลาด: กรุณาเลือกข้อมูลอย่างน้อย 1 ภูมิภาค")
+        st.error("กรุณาเลือกข้อมูลอย่างน้อย 1 ภูมิภาค")
         st.stop()
 
     if not wmo_stations:
-        st.error("ข้อผิดพลาด: ไม่พบสถานีอุตุนิยมวิทยาในภูมิภาคที่เลือก")
+        st.error("ไม่พบสถานีอุตุนิยมวิทยาในภูมิภาคที่เลือก")
         st.stop()
 
     is_valid_date_range, query_end_date = validate_date_range(start_date, end_date)
@@ -179,7 +143,7 @@ if st.button("ประมวลผลและทำความสะอาด
         except Exception as e:
             progress_bar.empty()
             status_text.empty()
-            st.error(f"ข้อผิดพลาดระหว่างเตรียมข้อมูลสภาพอากาศ: {e}")
+            st.error(f"เกิดข้อผิดพลาดระหว่างเตรียมข้อมูลสภาพอากาศ: {e}")
             st.stop()
 
         try:
@@ -188,10 +152,7 @@ if st.button("ประมวลผลและทำความสะอาด
         except Exception as e:
             st.warning(f"ไม่สามารถดึงข้อมูล ONI ได้ในขณะนี้: {e}")
 
-        status_text.markdown(
-            f"<div style='display:flex;align-items:center;gap:8px;'>{icon_svg('check', 18)}<span>เสร็จสิ้นกระบวนการ!</span></div>",
-            unsafe_allow_html=True,
-        )
+        status_text.markdown("เสร็จสิ้นกระบวนการ!")
         progress_bar.empty()
 
         if success_count < MIN_STATION_THRESHOLD:
@@ -201,7 +162,7 @@ if st.button("ประมวลผลและทำความสะอาด
 
         st.success("การประมวลผลข้อมูลเสร็จสมบูรณ์ ข้อมูลทั้งหมดไร้ Missing Values!")
 
-        section_title("map", "แผนที่แสดงพิกัดสถานีอุตุนิยมวิทยาที่สมบูรณ์")
+        st.markdown("### แผนที่แสดงพิกัดสถานีอุตุนิยมวิทยาที่สมบูรณ์")
         if fetched_stations:
             df_stations = pd.DataFrame(fetched_stations)
             fig_map = px.scatter_mapbox(
@@ -227,7 +188,7 @@ if st.button("ประมวลผลและทำความสะอาด
             fig_map.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
             st.plotly_chart(fig_map, use_container_width=True)
 
-        section_title("chart", "สถิติภูมิอากาศและดัชนี ONI รายเดือน")
+        st.markdown("### สถิติภูมิอากาศและดัชนี ONI รายเดือน")
         try:
             fig = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -287,10 +248,10 @@ if st.button("ประมวลผลและทำความสะอาด
         except Exception as e:
             st.error(f"เกิดข้อผิดพลาดในการวาดกราฟ: {e}")
 
-        section_title("table", "ตารางสรุปผลข้อมูลรายเดือน")
+        st.markdown("### ตารางสรุปผลข้อมูลรายเดือน")
         st.dataframe(df_monthly, use_container_width=True)
 
-        section_title("book", "พจนานุกรมข้อมูล (Data Dictionary)")
+        st.markdown("### พจนานุกรมข้อมูล (Data Dictionary)")
         with st.expander("คลิกเพื่อดูคำอธิบายตัวแปรในชุดข้อมูล", expanded=False):
             st.markdown(
                 """
@@ -309,7 +270,7 @@ if st.button("ประมวลผลและทำความสะอาด
             """
             )
 
-        section_title("download", "ส่งออกข้อมูล (รวมดัชนี ONI)")
+        st.markdown("### ส่งออกข้อมูล (รวมดัชนี ONI)")
         col_down1, col_down2, _ = st.columns([1, 1, 2])
 
         with col_down1:
@@ -339,7 +300,7 @@ if st.button("ประมวลผลและทำความสะอาด
         st.error("ไม่พบข้อมูลสภาพอากาศในช่วงเวลาที่ระบุ หรือล้มเหลวในการเชื่อมต่อกับทุกสถานี")
         if failed_stations:
             preview = pd.DataFrame(failed_stations)
-            section_title("search", "ตัวอย่างรายละเอียดข้อผิดพลาด (10 รายการแรก)")
+            st.markdown("### ตัวอย่างรายละเอียดข้อผิดพลาด (10 รายการแรก)")
             st.dataframe(preview.head(10), use_container_width=True)
 
 st.markdown("---")
