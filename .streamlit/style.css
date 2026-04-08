@@ -2,8 +2,9 @@
 /* Based on official corporate identity guidelines */
 
 /* Import IBM Plex Sans and Sarabun fonts */
-/* Note: these imports are removed at runtime unless `allow_remote_css_imports = true` in Streamlit secrets. */
+/* Includes Material Symbols fonts required by Streamlit controls. */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
 /* CSS Variables - Bank of Thailand Design System */
 :root {
@@ -60,9 +61,12 @@ html, body, [data-testid="stAppViewContainer"] {
   font-family: var(--font-thai);
 }
 
-[data-testid="stAppViewContainer"] [class*="material-symbol"],
-[data-testid="stAppViewContainer"] [class*="material-icons"] {
-  display: none !important;
+[data-testid="stAppViewContainer"] [class*="material-symbols"] {
+  font-family: 'Material Symbols Rounded', 'Material Symbols Outlined' !important;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1;
+  display: inline-block;
 }
 
 body {

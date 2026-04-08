@@ -44,9 +44,6 @@ st.set_page_config(page_title="Thailand Meteorological Analyzer", page_icon="☁
 style_path = Path(".streamlit/style.css")
 if style_path.exists():
     css_content = style_path.read_text(encoding="utf-8")
-    # Allow disabling remote font/icon imports in restricted environments.
-    if not st.secrets.get("allow_remote_css_imports", False):
-        css_content = "\n".join(line for line in css_content.splitlines() if not line.strip().startswith("@import"))
     st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
 else:
     st.warning("ไม่พบไฟล์สไตล์ .streamlit/style.css ระบบจะใช้ธีมเริ่มต้นของ Streamlit")
