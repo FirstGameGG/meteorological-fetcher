@@ -5,10 +5,6 @@
 /* Note: these imports are removed at runtime unless `allow_remote_css_imports = true` in Streamlit secrets. */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
-/* Import Material Icons (both versions for compatibility) */
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
-
 /* CSS Variables - Bank of Thailand Design System */
 :root {
   /* Colors - Primary */
@@ -59,9 +55,14 @@
   --transition-slow: 300ms ease;
 }
 
-/* Global styles scoped to Streamlit root to avoid excessive style recalculation. */
-html, body, [data-testid="stAppViewContainer"], [data-testid="stAppViewContainer"] * {
+/* Global styles scoped to app container without overriding icon glyph elements. */
+html, body, [data-testid="stAppViewContainer"] {
   font-family: var(--font-thai);
+}
+
+[data-testid="stAppViewContainer"] [class*="material-symbol"],
+[data-testid="stAppViewContainer"] [class*="material-icons"] {
+  display: none !important;
 }
 
 body {
