@@ -9,7 +9,7 @@ import streamlit as st
 from plotly.subplots import make_subplots
 
 from data_processing import build_monthly_weather_dataframe, merge_oni_labels, to_excel
-from ui_components import render_region_selector
+from ui_components import render_region_selector, render_station_selector
 from weather_fetcher import REGION_COLORS, fetch_oni_data, fetch_stations_parallel, load_stations
 
 MIN_STATION_THRESHOLD = 3
@@ -35,6 +35,42 @@ def validate_date_range(start_date: date, end_date: date):
         query_end_date = today
 
     return True, query_end_date
+
+
+def build_station_daily_dataframe(all_weather_data, station_lookup):
+    if not all_weather_data:
+        return pd.DataFrame()
+
+    df_station = pd.concat(all_weather_data, ignore_index=False)
+    df_station = df_station.reset_index().rename(columns={"time": "date"})
+    if "date" not in df_station.columns:
+        return pd.DataFrame()
+
+    df_station["date"] = pd.to_datetime(df_station["date"], errors="coerce")
+    df_station = df_station.dropna(subset=["date", "wmo_id"])
+    if df_station.empty:
+        return pd.DataFrame()
+
+    df_station["wmo_id"] = df_station["wmo_id"].astype(str)
+    df_station["temp"] = pd.to_numeric(df_station.get("temp"), errors="coerce")
+    df_station["prcp"] = pd.to_numeric(df_station.get("prcp", 0), errors="coerce").fillna(0)
+
+    df_station_daily = df_station.groupby(["wmo_id", "date"], as_index=False).agg(
+        temp_mean=("temp", "mean"),
+        prcp_sum=("prcp", "sum"),
+    )
+
+    df_station_daily["ชื่อสถานี"] = df_station_daily["wmo_id"].apply(
+        lambda station_id: station_lookup.get(station_id, {}).get("name", f"สถานี {station_id}")
+    )
+    df_station_daily["ภูมิภาค"] = df_station_daily["wmo_id"].apply(
+        lambda station_id: station_lookup.get(station_id, {}).get("region", "ไม่ทราบภูมิภาค")
+    )
+    df_station_daily["station_label"] = (
+        df_station_daily["ชื่อสถานี"] + " (" + df_station_daily["wmo_id"] + ")"
+    )
+
+    return df_station_daily
 
 
 # --- App setup ---
@@ -81,6 +117,7 @@ except Exception as e:
 with st.container():
     st.markdown("### กำหนดภูมิภาคและช่วงเวลาการสืบค้นข้อมูล")
     selected_regions = render_region_selector(REGION_COLORS)
+    selected_station_ids = render_station_selector(all_stations, selected_regions)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -93,12 +130,20 @@ with st.container():
     with col2:
         end_date = st.date_input("วันที่สิ้นสุด", date.today())
 
-wmo_stations = {k: v for k, v in all_stations.items() if v["region"] in selected_regions}
+stations_in_selected_regions = {k: v for k, v in all_stations.items() if v["region"] in selected_regions}
+wmo_stations = {k: v for k, v in stations_in_selected_regions.items() if k in selected_station_ids}
+is_station_subset_selection = bool(stations_in_selected_regions) and (
+    len(selected_station_ids) < len(stations_in_selected_regions)
+)
 
 # --- Execute processing ---
 if st.button("ประมวลผลและทำความสะอาดข้อมูล", type="primary", use_container_width=True):
     if not selected_regions:
         st.error("กรุณาเลือกข้อมูลอย่างน้อย 1 ภูมิภาค")
+        st.stop()
+
+    if not selected_station_ids:
+        st.error("กรุณาเลือกสถานีอย่างน้อย 1 สถานี")
         st.stop()
 
     if not wmo_stations:
@@ -153,9 +198,15 @@ if st.button("ประมวลผลและทำความสะอาด
         progress_bar.empty()
 
         if success_count < MIN_STATION_THRESHOLD:
-            st.warning(
-                f"สืบค้นข้อมูลได้เพียง {success_count} สถานี ซึ่งอาจไม่เพียงพอสำหรับเป็นตัวแทนของทั้งภูมิภาค"
-            )
+            if len(selected_station_ids) < MIN_STATION_THRESHOLD and is_station_subset_selection:
+                st.info(
+                    "คุณเลือกวิเคราะห์แบบรายสถานีจำนวนน้อย (1-2 สถานี) "
+                    "ผลลัพธ์จะแสดงลักษณะเฉพาะของสถานีที่เลือก ไม่ใช่ภาพรวมทั้งภูมิภาค"
+                )
+            else:
+                st.warning(
+                    f"สืบค้นข้อมูลได้เพียง {success_count} สถานี ซึ่งอาจไม่เพียงพอสำหรับเป็นตัวแทนของทั้งภูมิภาค"
+                )
 
         st.success("การประมวลผลข้อมูลเสร็จสมบูรณ์ ข้อมูลทั้งหมดไร้ Missing Values!")
 
@@ -184,6 +235,54 @@ if st.button("ประมวลผลและทำความสะอาด
             fig_map.update_layout(mapbox_style="open-street-map")
             fig_map.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
             st.plotly_chart(fig_map, use_container_width=True)
+
+        with st.expander("วิเคราะห์ข้อมูลรายสถานี (Station-Level)", expanded=False):
+            df_station_daily = build_station_daily_dataframe(all_weather_data, wmo_stations)
+            if df_station_daily.empty:
+                st.warning("ไม่สามารถสร้างกราฟรายสถานีได้ เนื่องจากข้อมูลรายวันไม่เพียงพอ")
+            else:
+                st.markdown("#### แนวโน้มอุณหภูมิเฉลี่ยรายวันแยกตามสถานี")
+                fig_station_temp = px.line(
+                    df_station_daily,
+                    x="date",
+                    y="temp_mean",
+                    color="station_label",
+                    hover_name="ชื่อสถานี",
+                    labels={
+                        "date": "วันที่",
+                        "temp_mean": "อุณหภูมิเฉลี่ย (°C)",
+                        "station_label": "สถานี",
+                    },
+                )
+                fig_station_temp.update_layout(legend_title_text="สถานี")
+                st.plotly_chart(fig_station_temp, use_container_width=True)
+
+                st.markdown("#### แนวโน้มปริมาณฝนรายวันแยกตามสถานี")
+                fig_station_prcp = px.line(
+                    df_station_daily,
+                    x="date",
+                    y="prcp_sum",
+                    color="station_label",
+                    hover_name="ชื่อสถานี",
+                    labels={
+                        "date": "วันที่",
+                        "prcp_sum": "ปริมาณฝน (mm)",
+                        "station_label": "สถานี",
+                    },
+                )
+                fig_station_prcp.update_layout(legend_title_text="สถานี")
+                st.plotly_chart(fig_station_prcp, use_container_width=True)
+
+                station_summary = (
+                    df_station_daily.groupby(["station_label", "ภูมิภาค"], as_index=False)
+                    .agg(
+                        อุณหภูมิเฉลี่ยรวม=("temp_mean", "mean"),
+                        ปริมาณฝนสะสมรวม=("prcp_sum", "sum"),
+                    )
+                    .sort_values(["ภูมิภาค", "station_label"])
+                )
+                st.markdown("#### สรุปรายสถานี")
+                st.dataframe(station_summary, use_container_width=True)
 
         st.markdown("### สถิติภูมิอากาศและดัชนี ONI รายเดือน")
         try:

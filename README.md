@@ -11,7 +11,7 @@ Interactive Streamlit app for Thailand weather analysis using Meteostat station 
 
 ## Highlights
 
-- Region-based station selection (map color matching)
+- Region + station-level selection (พร้อมตัวเลือก Select All)
 - Parallel station fetch with retry and nearest-station fallback
 - Automated cleaning, interpolation, and monthly aggregation
 - ONI merge + El Niño/La Niña intensity classification
@@ -47,8 +47,8 @@ streamlit run app.py
 
 ```mermaid
 flowchart LR
-    A[User input: regions + date range] --> B[Load stations.json]
-    B --> C[Filter stations by region]
+    A[User input: regions + stations + date range] --> B[Load stations.json]
+    B --> C[Filter stations by region and selected station IDs]
     C --> D[Parallel Meteostat fetch]
     D --> E[Normalize and clean raw data]
     E --> F[Interpolate missing weather values]
