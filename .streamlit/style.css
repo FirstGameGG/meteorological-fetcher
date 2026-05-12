@@ -188,6 +188,19 @@ h3 {
   font-family: var(--font-thai) !important;
 }
 
+/* MultiSelect selected tags: show full text (no ellipsis) */
+div[data-testid="stMultiSelect"] [data-baseweb="tag"] {
+  max-width: 100% !important;
+}
+
+div[data-testid="stMultiSelect"] [data-baseweb="tag"] > span {
+  max-width: 100% !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.35 !important;
+}
+
 .stTextInput > div > div > input:focus,
 .stDateInput > div > div > input:focus {
   border-color: var(--color-light-blue) !important;
