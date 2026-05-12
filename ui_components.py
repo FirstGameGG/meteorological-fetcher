@@ -62,6 +62,7 @@ def render_station_selector(stations: Dict[str, Dict[str, Any]], selected_region
     )
 
     if select_all:
+        selected_station_ids = station_ids
         st.caption(f"เลือกทั้งหมด {len(station_ids)} สถานี")
         st.multiselect(
             "รายการสถานีที่เลือก",
@@ -70,22 +71,27 @@ def render_station_selector(stations: Dict[str, Dict[str, Any]], selected_region
             format_func=lambda station_id: station_label_map[station_id],
             disabled=True,
         )
-        return station_ids
+    else:
+        manual_selection_key = "station_selector_manual_ids"
+        previous_selection = st.session_state.get(manual_selection_key, station_ids)
+        filtered_previous_selection = [station_id for station_id in previous_selection if station_id in station_ids]
+        if not filtered_previous_selection:
+            filtered_previous_selection = station_ids
 
-    manual_selection_key = "station_selector_manual_ids"
-    previous_selection = st.session_state.get(manual_selection_key, station_ids)
-    filtered_previous_selection = [station_id for station_id in previous_selection if station_id in station_ids]
-    if not filtered_previous_selection:
-        filtered_previous_selection = station_ids
+        st.session_state[manual_selection_key] = filtered_previous_selection
 
-    st.session_state[manual_selection_key] = filtered_previous_selection
+        selected_station_ids = st.multiselect(
+            "รายการสถานีที่เลือก",
+            options=station_ids,
+            format_func=lambda station_id: station_label_map[station_id],
+            key=manual_selection_key,
+        )
+        st.caption(f"เลือกแล้ว {len(selected_station_ids)} / {len(station_ids)} สถานี")
 
-    selected_station_ids = st.multiselect(
-        "รายการสถานีที่เลือก",
-        options=station_ids,
-        format_func=lambda station_id: station_label_map[station_id],
-        key=manual_selection_key,
-    )
+    if selected_station_ids:
+        with st.expander(f"ดูชื่อเต็มสถานีที่เลือก ({len(selected_station_ids)} สถานี)", expanded=False):
+            st.markdown(
+                "\n".join([f"- {station_label_map[station_id]}" for station_id in selected_station_ids])
+            )
 
-    st.caption(f"เลือกแล้ว {len(selected_station_ids)} / {len(station_ids)} สถานี")
     return selected_station_ids
