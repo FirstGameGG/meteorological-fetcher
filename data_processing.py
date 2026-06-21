@@ -28,6 +28,8 @@ def classify_oni(oni_value):
         return "เอลนีโญปานกลาง (Moderate)"
     if oni_value >= 0.5:
         return "เอลนีโญอ่อน (Weak)"
+    if oni_value <= -2.0:
+        return "ลานีญารุนแรงมาก (Very Strong)"
     if oni_value <= -1.5:
         return "ลานีญารุนแรง (Strong)"
     if oni_value <= -1.0:
@@ -61,9 +63,13 @@ def build_monthly_weather_dataframe(all_weather_data: List[pd.DataFrame]) -> pd.
             df_raw[col] = np.nan
         df_raw[col] = pd.to_numeric(df_raw[col], errors="coerce")
 
-    df_raw[cols_to_interp] = df_raw.groupby("wmo_id")[cols_to_interp].apply(
-        lambda group: group.interpolate(method="linear", limit=INTERPOLATE_LIMIT_DAYS)
-    ).reset_index(level=0, drop=True)
+    # Interpolate short gaps per station in chronological order. Sorting first
+    # guarantees linear interpolation follows the time axis, and transform keeps
+    # the result aligned to the original rows without index gymnastics.
+    df_raw = df_raw.sort_values(["wmo_id", "date"])
+    df_raw[cols_to_interp] = df_raw.groupby("wmo_id")[cols_to_interp].transform(
+        lambda col: col.interpolate(method="linear", limit=INTERPOLATE_LIMIT_DAYS)
+    )
 
     df_daily = df_raw.groupby("date", as_index=False).agg(
         {
@@ -89,7 +95,9 @@ def build_monthly_weather_dataframe(all_weather_data: List[pd.DataFrame]) -> pd.
         rainy_days=("prcp", lambda x: (x > 0.5).sum()),
     )
 
-    df_monthly = df_monthly.bfill()
+    # Fill residual gaps at the leading/trailing edges of the series so the
+    # exported table is continuous; fully-empty indicators stay NaN by design.
+    df_monthly = df_monthly.bfill().ffill()
     df_monthly["year_month"] = df_monthly["year_month"].astype(str)
     return df_monthly
 

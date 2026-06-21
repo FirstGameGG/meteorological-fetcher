@@ -13,6 +13,8 @@ from ui_components import render_region_selector, render_station_selector
 from weather_fetcher import REGION_COLORS, fetch_oni_data, fetch_stations_parallel, load_stations
 
 MIN_STATION_THRESHOLD = 3
+LARGE_SELECTION_HINT = 40
+BASE_DIR = Path(__file__).resolve().parent
 
 # Bypass macOS Python SSL certificate verification issue globally.
 if hasattr(ssl, "_create_unverified_context"):
@@ -73,11 +75,40 @@ def build_station_daily_dataframe(all_weather_data, station_lookup):
     return df_station_daily
 
 
+def monthly_table_column_config():
+    """Human-readable Thai headers + units/decimals for the monthly table.
+
+    Keys that are absent from the dataframe are ignored by Streamlit, so it is
+    safe to describe every possible column here.
+    """
+    return {
+        "year_month": st.column_config.TextColumn("เดือน"),
+        "temp_mean": st.column_config.NumberColumn("อุณหภูมิเฉลี่ย (°C)", format="%.1f"),
+        "tmax_max": st.column_config.NumberColumn("อุณหภูมิสูงสุด (°C)", format="%.1f"),
+        "tmin_min": st.column_config.NumberColumn("อุณหภูมิต่ำสุด (°C)", format="%.1f"),
+        "rhum_mean": st.column_config.NumberColumn("ความชื้น (%)", format="%.0f"),
+        "wspd_mean": st.column_config.NumberColumn("ความเร็วลม (km/h)", format="%.1f"),
+        "pres_mean": st.column_config.NumberColumn("ความกดอากาศ (hPa)", format="%.1f"),
+        "prcp_sum": st.column_config.NumberColumn("ปริมาณฝนรวม (mm)", format="%.1f"),
+        "rainy_days": st.column_config.NumberColumn("วันฝนตก", format="%d"),
+        "ONI_Index": st.column_config.NumberColumn("ดัชนี ONI", format="%.2f"),
+        "ONI_Label": st.column_config.TextColumn("การจัดประเภท ONI"),
+    }
+
+
 # --- App setup ---
-st.set_page_config(page_title="Thailand Meteorological Analyzer", page_icon="☁️", layout="wide")
+st.set_page_config(
+    page_title="Thailand Meteorological Analyzer",
+    page_icon="☁️",
+    layout="wide",
+    menu_items={
+        "about": "ระบบรวบรวมและวิเคราะห์ข้อมูลอุตุนิยมวิทยาประเทศไทย • ข้อมูลจาก Meteostat และ NOAA "
+        "• โครงการนี้ไม่ใช่เว็บไซต์อย่างเป็นทางการของหน่วยงานรัฐ",
+    },
+)
 
 # Load custom CSS (Bank of Thailand Design System)
-style_path = Path(".streamlit/style.css")
+style_path = BASE_DIR / ".streamlit" / "style.css"
 if style_path.exists():
     css_content = style_path.read_text(encoding="utf-8")
     st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
@@ -89,7 +120,7 @@ header_container = st.container()
 
 with header_container:
     header_col1, header_col2 = st.columns([6, 1])
-    
+
     with header_col1:
         st.title("ระบบรวบรวมและวิเคราะห์ข้อมูลอุตุนิยมวิทยา")
         st.header("ประเทศไทย")
@@ -98,13 +129,13 @@ with header_container:
             "พร้อมผนวกรวมดัชนีชี้วัดปรากฏการณ์เอลนีโญ-ลานีญา (ONI) จาก NOAA ผ่านกระบวนการทำความสะอาดข้อมูล "
             "(Data Cleaning) และแสดงผลในรูปแบบ Visualizations เพื่อสนับสนุนการตัดสินใจ"
         )
-    
+
     with header_col2:
         logo_col1, logo_col2 = st.columns(2)
         with logo_col1:
-            st.image("assets/TMD.png", use_container_width=True)
+            st.image(str(BASE_DIR / "assets" / "TMD.png"), width="stretch")
         with logo_col2:
-            st.image("assets/NOAA.png", use_container_width=True)
+            st.image(str(BASE_DIR / "assets" / "NOAA.png"), width="stretch")
 
 # --- Station data loading ---
 try:
@@ -116,6 +147,10 @@ except Exception as e:
 # --- User inputs ---
 with st.container():
     st.markdown("### กำหนดภูมิภาคและช่วงเวลาการสืบค้นข้อมูล")
+    st.caption(
+        "ขั้นตอน: (1) เลือกภูมิภาค → (2) เลือกสถานี → (3) กำหนดช่วงเวลา → "
+        "(4) กดปุ่มเพื่อเริ่มสืบค้นและทำความสะอาดข้อมูล"
+    )
     selected_regions = render_region_selector(REGION_COLORS)
     selected_station_ids = render_station_selector(all_stations, selected_regions)
 
@@ -136,8 +171,20 @@ is_station_subset_selection = bool(stations_in_selected_regions) and (
     len(selected_station_ids) < len(stations_in_selected_regions)
 )
 
+# --- Selection summary + action ---
+if wmo_stations:
+    st.caption(
+        f"พร้อมสืบค้นข้อมูล **{len(wmo_stations)}** สถานี จาก **{len(selected_regions)}** ภูมิภาค "
+        f"ในช่วง {start_date:%d/%m/%Y} – {end_date:%d/%m/%Y}"
+    )
+    if len(wmo_stations) > LARGE_SELECTION_HINT:
+        st.caption(
+            "⏳ การเลือกสถานีจำนวนมากอาจใช้เวลาสืบค้นนานขึ้น "
+            "แนะนำให้จำกัดจำนวนสถานีหรือช่วงเวลาเพื่อความรวดเร็ว"
+        )
+
 # --- Execute processing ---
-if st.button("ประมวลผลและทำความสะอาดข้อมูล", type="primary", use_container_width=True):
+if st.button("ประมวลผลและทำความสะอาดข้อมูล", type="primary", width="stretch"):
     if not selected_regions:
         st.error("กรุณาเลือกข้อมูลอย่างน้อย 1 ภูมิภาค")
         st.stop()
@@ -177,7 +224,7 @@ if st.button("ประมวลผลและทำความสะอาด
     )
 
     with st.expander("รายละเอียดบันทึกการสืบค้นข้อมูลรายสถานี"):
-        st.dataframe(pd.DataFrame(station_results), use_container_width=True)
+        st.dataframe(pd.DataFrame(station_results), width="stretch", hide_index=True)
 
     if all_weather_data:
         try:
@@ -208,39 +255,127 @@ if st.button("ประมวลผลและทำความสะอาด
                     f"สืบค้นข้อมูลได้เพียง {success_count} สถานี ซึ่งอาจไม่เพียงพอสำหรับเป็นตัวแทนของทั้งภูมิภาค"
                 )
 
-        st.success("การประมวลผลข้อมูลเสร็จสมบูรณ์ ข้อมูลทั้งหมดไร้ Missing Values!")
-
-        st.markdown("### แผนที่แสดงพิกัดสถานีอุตุนิยมวิทยาที่สมบูรณ์")
-        if fetched_stations:
-            df_stations = pd.DataFrame(fetched_stations)
-            fig_map = px.scatter_mapbox(
-                df_stations,
-                lat="ละติจูด",
-                lon="ลองจิจูด",
-                color="ภูมิภาค",
-                category_orders={"ภูมิภาค": list(REGION_COLORS.keys())},
-                color_discrete_map=REGION_COLORS,
-                hover_name="ชื่อสถานี",
-                hover_data={
-                    "ภูมิภาค": True,
-                    "ที่อยู่": True,
-                    "รหัสสถานี (WMO)": True,
-                    "ละติจูด": True,
-                    "ลองจิจูด": True,
-                    "แหล่งข้อมูล": True,
-                },
-                zoom=4.5,
-                height=600,
+        weather_value_cols = [
+            "temp_mean", "tmax_max", "tmin_min", "rhum_mean",
+            "wspd_mean", "pres_mean", "prcp_sum", "rainy_days",
+        ]
+        incomplete_cols = [
+            col for col in weather_value_cols
+            if col in df_monthly.columns and df_monthly[col].isna().any()
+        ]
+        if incomplete_cols:
+            st.success("การประมวลผลและทำความสะอาดข้อมูลเสร็จสมบูรณ์")
+            st.info(
+                "หมายเหตุ: ตัวชี้วัดต่อไปนี้ไม่มีข้อมูลเพียงพอในบางช่วงจึงเว้นว่างไว้: "
+                + ", ".join(incomplete_cols)
             )
-            fig_map.update_layout(mapbox_style="open-street-map")
-            fig_map.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-            st.plotly_chart(fig_map, use_container_width=True)
+        else:
+            st.success("การประมวลผลข้อมูลเสร็จสมบูรณ์ ข้อมูลทั้งหมดไร้ Missing Values!")
 
-        with st.expander("วิเคราะห์ข้อมูลรายสถานี (Station-Level)", expanded=False):
+        # --- Summary metric cards ---
+        month_count = df_monthly["year_month"].nunique()
+        avg_temp = df_monthly["temp_mean"].mean() if "temp_mean" in df_monthly.columns else float("nan")
+        avg_rain = df_monthly["prcp_sum"].mean() if "prcp_sum" in df_monthly.columns else float("nan")
+
+        latest_phase = None
+        latest_phase_month = None
+        if {"ONI_Label", "ONI_Index"}.issubset(df_monthly.columns):
+            labeled = df_monthly.dropna(subset=["ONI_Index"])
+            if not labeled.empty:
+                latest_phase = str(labeled.iloc[-1]["ONI_Label"])
+                latest_phase_month = str(labeled.iloc[-1]["year_month"])
+
+        metric_cols = st.columns(4)
+        metric_cols[0].metric("สถานีที่สืบค้นสำเร็จ", f"{success_count}/{total_stations}")
+        metric_cols[1].metric("จำนวนเดือนที่วิเคราะห์", f"{month_count:,}")
+        metric_cols[2].metric("อุณหภูมิเฉลี่ย", f"{avg_temp:.1f} °C" if pd.notna(avg_temp) else "—")
+        metric_cols[3].metric("ปริมาณฝนเฉลี่ย/เดือน", f"{avg_rain:.0f} mm" if pd.notna(avg_rain) else "—")
+        if latest_phase:
+            st.caption(f"สถานะ ENSO ล่าสุด ({latest_phase_month}): **{latest_phase}**")
+
+        # --- Result tabs ---
+        tab_overview, tab_station, tab_map, tab_export = st.tabs(
+            ["📈 ภาพรวมรายเดือน", "🔬 รายสถานี", "📍 แผนที่สถานี", "💾 ข้อมูลและส่งออก"]
+        )
+
+        with tab_overview:
+            st.markdown("#### สถิติภูมิอากาศและดัชนี ONI รายเดือน")
+            try:
+                fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+                fig.add_trace(
+                    go.Scatter(
+                        x=df_monthly["year_month"],
+                        y=df_monthly["prcp_sum"],
+                        name="ปริมาณฝน (mm)",
+                        fill="tozeroy",
+                        mode="lines",
+                        line=dict(color="rgba(0, 150, 255, 0.7)", width=2),
+                    ),
+                    secondary_y=False,
+                )
+
+                fig.add_trace(
+                    go.Scatter(
+                        x=df_monthly["year_month"],
+                        y=df_monthly["temp_mean"],
+                        name="อุณหภูมิเฉลี่ย (°C)",
+                        mode="lines",
+                        line=dict(color="orange", width=2),
+                    ),
+                    secondary_y=True,
+                )
+
+                if "ONI_Index" in df_monthly.columns:
+                    if "ONI_Label" not in df_monthly.columns:
+                        df_monthly["ONI_Label"] = "ไม่สามารถจัดประเภทได้"
+
+                    fig.add_trace(
+                        go.Scatter(
+                            x=df_monthly["year_month"],
+                            y=df_monthly["ONI_Index"],
+                            name="ดัชนี ONI",
+                            mode="lines",
+                            line=dict(color="red", width=2, dash="dot"),
+                            customdata=df_monthly[["ONI_Label"]].values,
+                            hovertemplate=(
+                                "เดือน: %{x}<br>"
+                                "ดัชนี ONI: %{y:.2f}<br>"
+                                "ผลการจัดประเภท: %{customdata[0]}<extra></extra>"
+                            ),
+                        ),
+                        secondary_y=True,
+                    )
+
+                fig.update_layout(
+                    template="plotly_white",
+                    title="สถิติสภาพอากาศรายเดือนเทียบดัชนี ONI",
+                    hovermode="x unified",
+                    height=520,
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                )
+                fig.update_yaxes(title_text="ปริมาณฝน (mm)", secondary_y=False)
+                fig.update_yaxes(title_text="อุณหภูมิ / ดัชนี ONI", secondary_y=True)
+                fig.update_xaxes(rangeslider=dict(visible=True))
+
+                st.plotly_chart(fig, width="stretch")
+            except Exception as e:
+                st.error(f"เกิดข้อผิดพลาดในการวาดกราฟ: {e}")
+
+            st.markdown("#### ตารางสรุปผลข้อมูลรายเดือน")
+            st.dataframe(
+                df_monthly,
+                width="stretch",
+                hide_index=True,
+                column_config=monthly_table_column_config(),
+            )
+
+        with tab_station:
             df_station_daily = build_station_daily_dataframe(all_weather_data, wmo_stations)
             if df_station_daily.empty:
                 st.warning("ไม่สามารถสร้างกราฟรายสถานีได้ เนื่องจากข้อมูลรายวันไม่เพียงพอ")
             else:
+                st.caption("วิเคราะห์ข้อมูลแยกแต่ละสถานีที่เลือก (Station-Level)")
                 st.markdown("#### แนวโน้มอุณหภูมิเฉลี่ยรายวันแยกตามสถานี")
                 fig_station_temp = px.line(
                     df_station_daily,
@@ -254,8 +389,8 @@ if st.button("ประมวลผลและทำความสะอาด
                         "station_label": "สถานี",
                     },
                 )
-                fig_station_temp.update_layout(legend_title_text="สถานี")
-                st.plotly_chart(fig_station_temp, use_container_width=True)
+                fig_station_temp.update_layout(template="plotly_white", legend_title_text="สถานี")
+                st.plotly_chart(fig_station_temp, width="stretch")
 
                 st.markdown("#### แนวโน้มปริมาณฝนรายวันแยกตามสถานี")
                 fig_station_prcp = px.line(
@@ -270,8 +405,8 @@ if st.button("ประมวลผลและทำความสะอาด
                         "station_label": "สถานี",
                     },
                 )
-                fig_station_prcp.update_layout(legend_title_text="สถานี")
-                st.plotly_chart(fig_station_prcp, use_container_width=True)
+                fig_station_prcp.update_layout(template="plotly_white", legend_title_text="สถานี")
+                st.plotly_chart(fig_station_prcp, width="stretch")
 
                 station_summary = (
                     df_station_daily.groupby(["station_label", "ภูมิภาค"], as_index=False)
@@ -282,114 +417,94 @@ if st.button("ประมวลผลและทำความสะอาด
                     .sort_values(["ภูมิภาค", "station_label"])
                 )
                 st.markdown("#### สรุปรายสถานี")
-                st.dataframe(station_summary, use_container_width=True)
-
-        st.markdown("### สถิติภูมิอากาศและดัชนี ONI รายเดือน")
-        try:
-            fig = make_subplots(specs=[[{"secondary_y": True}]])
-
-            fig.add_trace(
-                go.Scatter(
-                    x=df_monthly["year_month"],
-                    y=df_monthly["prcp_sum"],
-                    name="ปริมาณฝน (mm)",
-                    fill="tozeroy",
-                    mode="lines",
-                    line=dict(color="rgba(0, 150, 255, 0.7)", width=2),
-                ),
-                secondary_y=False,
-            )
-
-            fig.add_trace(
-                go.Scatter(
-                    x=df_monthly["year_month"],
-                    y=df_monthly["temp_mean"],
-                    name="อุณหภูมิเฉลี่ย (°C)",
-                    mode="lines",
-                    line=dict(color="orange", width=2),
-                ),
-                secondary_y=True,
-            )
-
-            if "ONI_Index" in df_monthly.columns:
-                if "ONI_Label" not in df_monthly.columns:
-                    df_monthly["ONI_Label"] = "ไม่สามารถจัดประเภทได้"
-
-                fig.add_trace(
-                    go.Scatter(
-                        x=df_monthly["year_month"],
-                        y=df_monthly["ONI_Index"],
-                        name="ดัชนี ONI",
-                        mode="lines",
-                        line=dict(color="red", width=2, dash="dot"),
-                        customdata=df_monthly[["ONI_Label"]].values,
-                        hovertemplate=(
-                            "เดือน: %{x}<br>"
-                            "ดัชนี ONI: %{y:.2f}<br>"
-                            "ผลการจัดประเภท: %{customdata[0]}<extra></extra>"
-                        ),
-                    ),
-                    secondary_y=True,
+                st.dataframe(
+                    station_summary,
+                    width="stretch",
+                    hide_index=True,
+                    column_config={
+                        "station_label": st.column_config.TextColumn("สถานี"),
+                        "ภูมิภาค": st.column_config.TextColumn("ภูมิภาค"),
+                        "อุณหภูมิเฉลี่ยรวม": st.column_config.NumberColumn("อุณหภูมิเฉลี่ย (°C)", format="%.1f"),
+                        "ปริมาณฝนสะสมรวม": st.column_config.NumberColumn("ปริมาณฝนสะสม (mm)", format="%.1f"),
+                    },
                 )
 
-            fig.update_layout(
-                title="สถิติสภาพอากาศรายเดือนเทียบดัชนี ONI",
-                hovermode="x unified",
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-            )
-            fig.update_yaxes(title_text="ปริมาณฝน (mm)", secondary_y=False)
-            fig.update_yaxes(title_text="อุณหภูมิ / ดัชนี ONI", secondary_y=True)
+        with tab_map:
+            st.markdown("#### แผนที่แสดงพิกัดสถานีอุตุนิยมวิทยาที่สืบค้นสำเร็จ")
+            if fetched_stations:
+                df_stations = pd.DataFrame(fetched_stations)
+                fig_map = px.scatter_map(
+                    df_stations,
+                    lat="ละติจูด",
+                    lon="ลองจิจูด",
+                    color="ภูมิภาค",
+                    category_orders={"ภูมิภาค": list(REGION_COLORS.keys())},
+                    color_discrete_map=REGION_COLORS,
+                    hover_name="ชื่อสถานี",
+                    hover_data={
+                        "ภูมิภาค": True,
+                        "ที่อยู่": True,
+                        "รหัสสถานี (WMO)": True,
+                        "ละติจูด": True,
+                        "ลองจิจูด": True,
+                        "แหล่งข้อมูล": True,
+                    },
+                    zoom=4.5,
+                    height=600,
+                )
+                fig_map.update_layout(
+                    map_style="open-street-map",
+                    margin={"r": 0, "t": 0, "l": 0, "b": 0},
+                )
+                st.plotly_chart(fig_map, width="stretch")
+            else:
+                st.info("ไม่มีสถานีที่สืบค้นสำเร็จสำหรับแสดงบนแผนที่")
 
-            st.plotly_chart(fig, use_container_width=True)
-        except Exception as e:
-            st.error(f"เกิดข้อผิดพลาดในการวาดกราฟ: {e}")
+        with tab_export:
+            st.markdown("#### ส่งออกข้อมูล (รวมดัชนี ONI)")
+            col_down1, col_down2, _ = st.columns([1, 1, 2])
 
-        st.markdown("### ตารางสรุปผลข้อมูลรายเดือน")
-        st.dataframe(df_monthly, use_container_width=True)
+            with col_down1:
+                csv_data = df_monthly.to_csv(index=False).encode("utf-8-sig")
+                st.download_button(
+                    label="ส่งออกเป็น CSV",
+                    data=csv_data,
+                    file_name=f"thailand_weather_monthly_with_oni_{start_date.year}_to_{end_date.year}.csv",
+                    mime="text/csv",
+                    type="primary",
+                    width="stretch",
+                )
 
-        st.markdown("### พจนานุกรมข้อมูล (Data Dictionary)")
-        with st.expander("คลิกเพื่อดูคำอธิบายตัวแปรในชุดข้อมูล", expanded=False):
-            st.markdown(
-                """
-            | ชื่อตัวแปร (Field) | คำอธิบาย (Description) | หน่วย (Unit) |
-            | --- | --- | --- |
-            | **year_month** | ปีและเดือนของข้อมูล | YYYY-MM |
-            | **temp_mean** | อุณหภูมิเฉลี่ยประจำเดือน | องศาเซลเซียส (°C) |
-            | **tmax_max** | อุณหภูมิสูงสุดที่บันทึกได้ในเดือนนั้น | องศาเซลเซียส (°C) |
-            | **tmin_min** | อุณหภูมิต่ำสุดที่บันทึกได้ในเดือนนั้น | องศาเซลเซียส (°C) |
-            | **rhum_mean** | ความชื้นสัมพัทธ์เฉลี่ย | เปอร์เซ็นต์ (%) |
-            | **wspd_mean** | ความเร็วลมเฉลี่ย | กิโลเมตรต่อชั่วโมง (km/h) |
-            | **pres_mean** | ความกดอากาศเฉลี่ยที่ระดับน้ำทะเล | เฮกโตปาสคาล (hPa) |
-            | **prcp_sum** | ปริมาณน้ำฝนสะสมรวมในเดือนนั้น | มิลลิเมตร (mm) |
-            | **rainy_days** | จำนวนวันที่ฝนตก (ปริมาณฝน > 0.5 mm) | วัน (days) |
-            | **ONI_Index** | ดัชนี Oceanic Niño Index ชี้วัดความรุนแรงปรากฏการณ์เอลนีโญ/ลานีญา | - |
-            """
-            )
+            with col_down2:
+                excel_data = to_excel(df_monthly)
+                st.download_button(
+                    label="ส่งออกเป็น Excel",
+                    data=excel_data,
+                    file_name=f"thailand_weather_monthly_with_oni_{start_date.year}_to_{end_date.year}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    type="primary",
+                    width="stretch",
+                )
 
-        st.markdown("### ส่งออกข้อมูล (รวมดัชนี ONI)")
-        col_down1, col_down2, _ = st.columns([1, 1, 2])
-
-        with col_down1:
-            csv_data = df_monthly.to_csv(index=False, encoding="utf-8-sig").encode("utf-8-sig")
-            st.download_button(
-                label="ส่งออกเป็น CSV",
-                data=csv_data,
-                file_name=f"thailand_weather_monthly_with_oni_{start_date.year}_to_{end_date.year}.csv",
-                mime="text/csv",
-                type="primary",
-                use_container_width=True,
-            )
-
-        with col_down2:
-            excel_data = to_excel(df_monthly)
-            st.download_button(
-                label="ส่งออกเป็น Excel",
-                data=excel_data,
-                file_name=f"thailand_weather_monthly_with_oni_{start_date.year}_to_{end_date.year}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                type="primary",
-                use_container_width=True,
-            )
+            st.markdown("#### พจนานุกรมข้อมูล (Data Dictionary)")
+            with st.expander("คลิกเพื่อดูคำอธิบายตัวแปรในชุดข้อมูล", expanded=False):
+                st.markdown(
+                    """
+| ชื่อตัวแปร (Field) | คำอธิบาย (Description) | หน่วย (Unit) |
+| --- | --- | --- |
+| **year_month** | ปีและเดือนของข้อมูล | YYYY-MM |
+| **temp_mean** | อุณหภูมิเฉลี่ยประจำเดือน | องศาเซลเซียส (°C) |
+| **tmax_max** | อุณหภูมิสูงสุดที่บันทึกได้ในเดือนนั้น | องศาเซลเซียส (°C) |
+| **tmin_min** | อุณหภูมิต่ำสุดที่บันทึกได้ในเดือนนั้น | องศาเซลเซียส (°C) |
+| **rhum_mean** | ความชื้นสัมพัทธ์เฉลี่ย | เปอร์เซ็นต์ (%) |
+| **wspd_mean** | ความเร็วลมเฉลี่ย | กิโลเมตรต่อชั่วโมง (km/h) |
+| **pres_mean** | ความกดอากาศเฉลี่ยที่ระดับน้ำทะเล | เฮกโตปาสคาล (hPa) |
+| **prcp_sum** | ปริมาณน้ำฝนสะสมรวมในเดือนนั้น | มิลลิเมตร (mm) |
+| **rainy_days** | จำนวนวันที่ฝนตก (ปริมาณฝน > 0.5 mm) | วัน (days) |
+| **ONI_Index** | ดัชนี Oceanic Niño Index ชี้วัดความรุนแรงปรากฏการณ์เอลนีโญ/ลานีญา | - |
+| **ONI_Label** | ผลการจัดประเภทความรุนแรงเอลนีโญ/ลานีญาจากค่า ONI | - |
+"""
+                )
     else:
         progress_bar.empty()
         status_text.empty()
@@ -397,7 +512,7 @@ if st.button("ประมวลผลและทำความสะอาด
         if failed_stations:
             preview = pd.DataFrame(failed_stations)
             st.markdown("### ตัวอย่างรายละเอียดข้อผิดพลาด (10 รายการแรก)")
-            st.dataframe(preview.head(10), use_container_width=True)
+            st.dataframe(preview.head(10), width="stretch", hide_index=True)
 
 st.markdown("---")
 st.markdown(

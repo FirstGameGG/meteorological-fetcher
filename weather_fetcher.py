@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import io
 import json
-import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, Dict, Tuple
+from pathlib import Path
+from typing import Any, Dict
 
 import meteostat as ms
 import pandas as pd
@@ -19,6 +19,10 @@ BASE_BACKOFF_SECONDS = 1.0
 MAX_PARALLEL_WORKERS = 12
 ONI_SOURCE_URL = "https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php"
 
+# Anchor the station master file to this module's directory so the app works
+# regardless of the current working directory it is launched from.
+STATIONS_FILE = Path(__file__).resolve().parent / "stations.json"
+
 REGION_COLORS = {
     "ภาคเหนือ": "#1f77b4",
     "ภาคตะวันออกเฉียงเหนือ": "#ff7f0e",
@@ -31,11 +35,10 @@ REGION_COLORS = {
 
 @st.cache_data(show_spinner=False)
 def load_stations() -> Dict[str, Dict[str, Any]]:
-    stations_file = "stations.json"
-    if not os.path.exists(stations_file):
+    if not STATIONS_FILE.exists():
         raise FileNotFoundError("ไม่พบไฟล์ stations.json กรุณาแปลงไฟล์สถานีเป็น JSON ก่อนใช้งาน")
 
-    with open(stations_file, "r", encoding="utf-8") as f:
+    with open(STATIONS_FILE, "r", encoding="utf-8") as f:
         stations = json.load(f)
 
     if not isinstance(stations, dict):
