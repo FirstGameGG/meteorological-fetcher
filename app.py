@@ -99,7 +99,7 @@ def monthly_table_column_config():
 # --- App setup ---
 st.set_page_config(
     page_title="Thailand Meteorological Analyzer",
-    page_icon="☁️",
+    page_icon=":material/cloud:",
     layout="wide",
     menu_items={
         "about": "ระบบรวบรวมและวิเคราะห์ข้อมูลอุตุนิยมวิทยาประเทศไทย • ข้อมูลจาก Meteostat และ NOAA "
@@ -179,7 +179,7 @@ if wmo_stations:
     )
     if len(wmo_stations) > LARGE_SELECTION_HINT:
         st.caption(
-            "⏳ การเลือกสถานีจำนวนมากอาจใช้เวลาสืบค้นนานขึ้น "
+            ":material/schedule: การเลือกสถานีจำนวนมากอาจใช้เวลาสืบค้นนานขึ้น "
             "แนะนำให้จำกัดจำนวนสถานีหรือช่วงเวลาเพื่อความรวดเร็ว"
         )
 
@@ -295,7 +295,12 @@ if st.button("ประมวลผลและทำความสะอาด
 
         # --- Result tabs ---
         tab_overview, tab_station, tab_map, tab_export = st.tabs(
-            ["📈 ภาพรวมรายเดือน", "🔬 รายสถานี", "📍 แผนที่สถานี", "💾 ข้อมูลและส่งออก"]
+            [
+                ":material/monitoring: ภาพรวมรายเดือน",
+                ":material/sensors: รายสถานี",
+                ":material/map: แผนที่สถานี",
+                ":material/download: ข้อมูลและส่งออก",
+            ]
         )
 
         with tab_overview:
