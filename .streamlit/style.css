@@ -1,461 +1,259 @@
-/* Bank of Thailand Design System - Applied to Streamlit */
-/* Based on official corporate identity guidelines */
+/* ============================================================
+   Bank of Thailand Design System — Streamlit adaptation
+   Tokens taken verbatim from the BOT Design System (tokens/*.css).
+   Character: light, text-forward, institutional. White page,
+   navy as punctuation (headings / primary action), flat fills,
+   1px hairline grey borders, navy-tinted shallow shadows, low
+   radii, minimal motion. No gradients, no bounce, no lift.
+   ============================================================ */
 
-/* Import IBM Plex Sans and Sarabun fonts */
-/* Includes Material Symbols fonts required by Streamlit controls. */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+/* Sarabun (Thai + Latin) + IBM Plex Mono for tabular figures.
+   Material Symbols is load-bearing: Streamlit's :material/…: icons
+   (page icon, tab icons, hints) render with it — do not remove. */
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
-/* CSS Variables - Bank of Thailand Design System */
 :root {
-  /* Colors - Primary */
-  --color-navy-blue: #003366;
-  --color-light-blue: #4A90E2;
-  --color-grey: #6B7280;
-  
-  /* Colors - Extended */
-  --color-dark-navy: #001F3F;
-  --color-sky-blue: #E3F2FD;
-  --color-charcoal: #374151;
-  --color-light-grey: #F3F4F6;
-  --color-white: #FFFFFF;
-  
-  /* Colors - Semantic */
-  --color-success: #10B981;
-  --color-warning: #F59E0B;
-  --color-error: #EF4444;
-  --color-info: #3B82F6;
-  
-  /* Typography */
-  --font-primary: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-thai: 'Sarabun', 'Noto Sans Thai', sans-serif;
-  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
-  
-  /* Spacing (8px grid) */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-12: 3rem;
-  
-  /* Border Radius */
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  
-  /* Transitions */
-  --transition-base: 200ms ease;
-  --transition-slow: 300ms ease;
+  /* Navy — brand / CTA / headings */
+  --navy-900:#0a1f3d; --navy-800:#0f2a52; --navy-700:#14345f; --navy-600:#1c4a80; --navy-500:#2a5f9e;
+  /* Blue — interactive / links / accent action */
+  --blue-600:#1868b7; --blue-500:#1f7fd6; --blue-400:#4098e0; --blue-100:#e4f0fb;
+  /* Light blue — tints / hover washes */
+  --lightblue-400:#5bb8e8; --lightblue-200:#b3ddf3; --lightblue-100:#dcf0fa;
+  /* Grey — neutrals do the structural work */
+  --grey-900:#23282e; --grey-800:#383f47; --grey-700:#545c66; --grey-600:#6d7580; --grey-500:#8a919b;
+  --grey-400:#aeb4bc; --grey-300:#ced2d8; --grey-200:#e3e6ea; --grey-100:#eef0f3; --grey-50:#f6f7f9; --white:#ffffff;
+  /* Semantic — forms/status only, muted + institutional */
+  --red-600:#c0342a;  --red-100:#fbe9e7;
+  --green-600:#2a7d4f; --green-100:#e6f4ea;
+  --gold-600:#a97c1f;  --gold-100:#faf1de;
+
+  /* Semantic aliases */
+  --color-bg:var(--white); --color-bg-subtle:var(--grey-50); --color-bg-tint:var(--lightblue-100);
+  --color-surface:var(--white); --color-surface-sunken:var(--grey-100);
+  --color-text-primary:var(--grey-900); --color-text-secondary:var(--grey-700); --color-text-muted:var(--grey-500);
+  --color-text-brand:var(--navy-800); --color-text-link:var(--blue-600);
+  --color-border:var(--grey-200); --color-border-strong:var(--grey-400); --color-border-focus:var(--blue-500);
+  --color-action-primary:var(--navy-800); --color-action-primary-hover:var(--navy-900); --color-action-primary-active:#071527;
+
+  /* Type */
+  --font-sans:"Sarabun","Noto Sans Thai","Segoe UI",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
+
+  /* Space — 4px scale */
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:20px; --space-6:24px; --space-8:32px; --space-10:40px; --space-12:48px;
+
+  /* Radii / shadows / motion — low + shallow + navy-tinted */
+  --radius-xs:3px; --radius-sm:4px; --radius-md:6px; --radius-lg:10px; --radius-pill:999px;
+  --shadow-xs:0 1px 2px rgba(10,31,61,.06);
+  --shadow-sm:0 2px 6px rgba(10,31,61,.08);
+  --shadow-md:0 6px 16px rgba(10,31,61,.10);
+  --shadow-focus:0 0 0 3px rgba(31,127,214,.28);
+  --border-hairline:1px solid var(--color-border);
+  --ease:cubic-bezier(.4,0,.2,1); --dur-fast:120ms; --dur:200ms;
 }
 
-/* Global styles scoped to app container without overriding icon glyph elements. */
-html, body, [data-testid="stAppViewContainer"] {
-  font-family: var(--font-thai);
+/* ---- Base ---- */
+html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
 }
+.block-container {
+  max-width: 1200px;
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-12);
+}
+p, li, label, span, div { font-family: var(--font-sans); }
+code, pre, kbd { font-family: var(--font-mono) !important; }
 
-[data-testid="stAppViewContainer"] [class*="material-symbols"] {
+/* Material Symbols must keep their own font (never inherit Sarabun) */
+[data-testid="stAppViewContainer"] [class*="material-symbols"],
+[data-testid="stIconMaterial"] {
   font-family: 'Material Symbols Rounded', 'Material Symbols Outlined' !important;
-  font-weight: 400;
-  font-style: normal;
-  line-height: 1;
-  display: inline-block;
+  font-weight: 400; font-style: normal; line-height: 1;
+  -webkit-font-smoothing: antialiased;
 }
 
-body {
-  background-color: var(--color-white) !important;
-  color: var(--color-charcoal) !important;
-}
-
-/* Main container */
-.main {
-  background-color: var(--color-white);
-  padding: var(--space-8) var(--space-6);
-}
-
-/* Header Styling - Bank of Thailand Standard (Light Theme) */
-.main > div:first-child {
-  background: var(--color-white) !important;
-  padding: var(--space-8) var(--space-6);
-  margin: calc(-1 * var(--space-8)) calc(-1 * var(--space-6)) var(--space-8);
-  border-bottom: 2px solid var(--color-light-grey);
-  box-shadow: var(--shadow-sm);
-}
-
-/* Typography - Headers */
+/* ---- Headings — navy title, blue subtitle, section accent rule ---- */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-thai) !important;
-  font-weight: 600 !important;
-  color: var(--color-navy-blue) !important;
-  letter-spacing: -0.025em;
+  font-family: var(--font-sans) !important;
+  color: var(--color-text-brand) !important;
+  letter-spacing: 0;
 }
-
-/* Main title */
-h1 {
-  font-size: 2.5rem !important;
-  color: var(--color-navy-blue) !important;
-  font-weight: 700 !important;
-  margin-bottom: var(--space-2) !important;
-}
-
-/* Subtitle */
-.main > div:first-child h2 {
-  color: var(--color-light-blue) !important;
-  font-size: 1.75rem !important;
-  font-weight: 500 !important;
-}
-
-/* Section headers */
+h1 { font-size: 2.25rem !important; font-weight: 700 !important; margin-bottom: var(--space-2) !important; }
+/* st.header subtitle — BOT interactive blue */
+h2 { color: var(--blue-600) !important; font-size: 1.6rem !important; font-weight: 600 !important; }
+/* st.markdown("### …") section headers — navy, thin blue accent rule */
 h3 {
-  font-size: 1.5rem !important;
-  margin-top: var(--space-8) !important;
-  margin-bottom: var(--space-4) !important;
-  padding-bottom: var(--space-3);
-  border-bottom: 3px solid var(--color-light-blue);
+  font-size: 1.35rem !important; font-weight: 600 !important;
+  margin-top: var(--space-8) !important; margin-bottom: var(--space-4) !important;
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--blue-500);
   display: inline-block;
 }
+h4 { font-size: 1.125rem !important; font-weight: 600 !important; margin-top: var(--space-5) !important; }
 
-/* Description text */
-.main > div:first-child p,
-.main > div:first-child .element-container {
-  color: var(--color-grey) !important;
-  font-size: 1.05rem;
-  line-height: 1.75;
+a { color: var(--color-text-link); text-decoration: none; }
+a:hover { color: var(--navy-800); text-decoration: underline; }
+
+/* Header intro / captions read as secondary ink */
+[data-testid="stCaptionContainer"], .stCaption, small { color: var(--color-text-secondary) !important; }
+
+/* Hairline dividers */
+hr, [data-testid="stDivider"] { border-color: var(--color-border) !important; }
+
+/* ---- Buttons — flat navy CTA, darken on hover, no gradient/lift ---- */
+.stButton > button, .stFormSubmitButton > button, [data-testid="stBaseButton-primary"] {
+  background: var(--color-action-primary) !important;
+  color: var(--white) !important;
+  border: 1px solid var(--color-action-primary) !important;
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 500 !important;
+  padding: var(--space-3) var(--space-6) !important;
+  box-shadow: var(--shadow-xs);
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
 }
-
-/* Buttons - Primary (Navy Blue) */
-.stButton > button {
-  background: linear-gradient(135deg, var(--color-navy-blue) 0%, var(--color-dark-navy) 100%) !important;
-  color: var(--color-white) !important;
-  font-family: var(--font-thai) !important;
-  font-weight: 600 !important;
-  font-size: 1rem !important;
-  padding: var(--space-3) var(--space-8) !important;
-  border-radius: var(--radius-md) !important;
-  border: none !important;
-  box-shadow: var(--shadow-md);
-  transition: all var(--transition-base) !important;
-  text-transform: none !important;
-  letter-spacing: 0.025em;
-}
-
-.stButton > button:hover {
-  background: linear-gradient(135deg, var(--color-dark-navy) 0%, #000d1a 100%) !important;
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-
-.stButton > button:active {
-  transform: translateY(0);
+.stButton > button:hover, .stFormSubmitButton > button:hover, [data-testid="stBaseButton-primary"]:hover {
+  background: var(--color-action-primary-hover) !important;
+  border-color: var(--color-action-primary-hover) !important;
   box-shadow: var(--shadow-sm);
 }
+.stButton > button:active, .stFormSubmitButton > button:active { background: var(--color-action-primary-active) !important; }
 
-/* Download Buttons */
+/* Download = blue accent (secondary action; visual hierarchy vs navy CTA) */
 .stDownloadButton > button {
-  background: linear-gradient(135deg, var(--color-light-blue) 0%, #357ABD 100%) !important;
-  color: var(--color-white) !important;
-  font-weight: 600 !important;
+  background: var(--blue-600) !important;
+  color: var(--white) !important;
+  border: 1px solid var(--blue-600) !important;
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 500 !important;
   padding: var(--space-3) var(--space-6) !important;
-  border-radius: var(--radius-md) !important;
-  box-shadow: var(--shadow-md);
-  transition: all var(--transition-base) !important;
+  box-shadow: var(--shadow-xs);
+  transition: background var(--dur-fast) var(--ease);
+}
+.stDownloadButton > button:hover { background: #125a9e !important; border-color: #125a9e !important; }
+
+/* ---- Inputs — 1px hairline, blue focus ring ---- */
+.stTextInput input, .stNumberInput input, .stDateInput input,
+[data-baseweb="select"] > div, [data-baseweb="input"] > div {
+  border: var(--border-hairline) !important;
+  border-radius: var(--radius-sm) !important;
+  background: var(--white) !important;
+  color: var(--color-text-primary) !important;
+  font-family: var(--font-sans) !important;
+}
+.stTextInput input:focus, .stNumberInput input:focus, .stDateInput input:focus {
+  border-color: var(--color-border-focus) !important;
+  box-shadow: var(--shadow-focus) !important;
+}
+[data-baseweb="select"] > div:focus-within, [data-baseweb="input"] > div:focus-within {
+  border-color: var(--color-border-focus) !important;
+  box-shadow: var(--shadow-focus) !important;
 }
 
-.stDownloadButton > button:hover {
-  background: linear-gradient(135deg, #357ABD 0%, #2868a6 100%) !important;
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-
-/* Input Fields */
-.stTextInput > div > div > input,
-.stDateInput > div > div > input,
-.stSelectbox > div > div > input {
-  border: 2px solid #D1D5DB !important;
-  border-radius: var(--radius-md) !important;
-  padding: var(--space-3) var(--space-4) !important;
-  font-size: 1rem !important;
-  color: var(--color-charcoal) !important;
-  background: var(--color-white) !important;
-  transition: all var(--transition-base) !important;
-  font-family: var(--font-thai) !important;
-}
-
-/* MultiSelect selected tags: show full text (no ellipsis) */
+/* MultiSelect tags: show full station name (no ellipsis) + BOT tint */
 div[data-testid="stMultiSelect"] [data-baseweb="tag"] {
   max-width: 100% !important;
+  background: var(--blue-100) !important;
+  color: var(--navy-800) !important;
+  border-radius: var(--radius-sm) !important;
 }
-
 div[data-testid="stMultiSelect"] [data-baseweb="tag"] > span {
-  max-width: 100% !important;
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  line-height: 1.35 !important;
+  max-width: 100% !important; white-space: normal !important;
+  overflow: visible !important; text-overflow: clip !important; line-height: 1.35 !important;
 }
 
-.stTextInput > div > div > input:focus,
-.stDateInput > div > div > input:focus {
-  border-color: var(--color-light-blue) !important;
-  outline: 2px solid var(--color-sky-blue) !important;
-  outline-offset: 0 !important;
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1) !important;
-}
+/* ---- Checkboxes — subtle brand-tint hover ---- */
+.stCheckbox > label { border-radius: var(--radius-sm); padding: var(--space-1) var(--space-2); transition: background var(--dur) var(--ease); }
+.stCheckbox > label:hover { background: var(--color-bg-tint); }
+/* Region colour swatches sit on a hairline */
+.stCheckbox div[style*="background-color"] { box-shadow: var(--shadow-xs); }
 
-/* Checkboxes */
-.stCheckbox {
-  font-family: var(--font-thai) !important;
-  font-weight: 500 !important;
-  color: var(--color-charcoal) !important;
-}
-
-.stCheckbox > label {
-  padding: var(--space-2) var(--space-3);
+/* ---- Metric cards (StatTicker pattern) ---- */
+[data-testid="stMetric"] {
+  background: var(--color-surface);
+  border: var(--border-hairline);
   border-radius: var(--radius-md);
-  transition: background-color var(--transition-base);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-xs);
 }
+[data-testid="stMetricLabel"] { color: var(--grey-600) !important; font-size: .8rem !important; }
+[data-testid="stMetricValue"] { color: var(--color-text-brand) !important; font-weight: 600 !important; }
 
-.stCheckbox > label:hover {
-  background-color: var(--color-sky-blue);
-}
-
-/* Region color swatches enhancement */
-.stCheckbox div[style*="background-color"] {
-  box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-/* Cards and Containers */
-.element-container,
-.stMarkdown,
-div[data-testid="stExpander"] {
-  font-family: var(--font-thai) !important;
-}
-
-/* Info, Success, Warning, Error messages */
-.stAlert {
-  border-radius: var(--radius-lg) !important;
-  border: none !important;
-  box-shadow: var(--shadow-base);
-  font-family: var(--font-thai) !important;
-  padding: var(--space-4) var(--space-6) !important;
-}
-
-div[data-baseweb="notification"][kind="info"] {
-  background-color: rgba(59, 130, 246, 0.1) !important;
-  border-left: 4px solid var(--color-info) !important;
-}
-
-div[data-baseweb="notification"][kind="success"] {
-  background-color: rgba(16, 185, 129, 0.1) !important;
-  border-left: 4px solid var(--color-success) !important;
-}
-
-div[data-baseweb="notification"][kind="warning"] {
-  background-color: rgba(245, 158, 11, 0.1) !important;
-  border-left: 4px solid var(--color-warning) !important;
-}
-
-div[data-baseweb="notification"][kind="error"] {
-  background-color: rgba(239, 68, 68, 0.1) !important;
-  border-left: 4px solid var(--color-error) !important;
-}
-
-/* Dataframe Tables */
-.dataframe {
-  font-family: var(--font-mono) !important;
-  border-radius: var(--radius-lg) !important;
-  overflow: hidden !important;
-  box-shadow: var(--shadow-base) !important;
-  border: 1px solid #E5E7EB !important;
-}
-
-.dataframe thead th {
-  background: linear-gradient(135deg, var(--color-navy-blue) 0%, var(--color-dark-navy) 100%) !important;
-  color: var(--color-white) !important;
-  font-weight: 600 !important;
-  padding: var(--space-4) !important;
-  text-align: left !important;
-  font-family: var(--font-thai) !important;
-}
-
-.dataframe tbody tr:nth-child(even) {
-  background-color: var(--color-light-grey) !important;
-}
-
-.dataframe tbody tr:hover {
-  background-color: var(--color-sky-blue) !important;
-  transition: background-color var(--transition-base);
-}
-
-.dataframe tbody td {
-  padding: var(--space-3) var(--space-4) !important;
-  border-bottom: 1px solid #E5E7EB !important;
-}
-
-/* Expander */
-div[data-testid="stExpander"] {
-  background-color: var(--color-white) !important;
-  border: 2px solid var(--color-light-grey) !important;
-  border-radius: var(--radius-lg) !important;
-  box-shadow: var(--shadow-sm);
-  margin: var(--space-4) 0 !important;
-  transition: all var(--transition-base);
-}
-
-div[data-testid="stExpander"]:hover {
-  border-color: var(--color-light-blue) !important;
-  box-shadow: var(--shadow-md);
-}
-
-div[data-testid="stExpander"] summary {
-  font-weight: 600 !important;
-  color: var(--color-navy-blue) !important;
-  padding: var(--space-4) !important;
-  font-size: 1.05rem !important;
-}
-
-/* Progress Bar */
-.stProgress > div > div > div {
-  background: linear-gradient(90deg, var(--color-light-blue) 0%, var(--color-navy-blue) 100%) !important;
+/* ---- Alerts — 4px left rule + tint, DS semantic hexes ---- */
+.stAlert, div[data-baseweb="notification"] {
   border-radius: var(--radius-md) !important;
-  height: 12px !important;
+  box-shadow: var(--shadow-xs);
+  font-family: var(--font-sans) !important;
 }
+div[data-baseweb="notification"][kind="info"]    { background: var(--blue-100) !important;  border-left: 4px solid var(--blue-600) !important; }
+div[data-baseweb="notification"][kind="positive"],
+div[data-baseweb="notification"][kind="success"] { background: var(--green-100) !important; border-left: 4px solid var(--green-600) !important; }
+div[data-baseweb="notification"][kind="warning"]  { background: var(--gold-100) !important;  border-left: 4px solid var(--gold-600) !important; }
+div[data-baseweb="notification"][kind="negative"],
+div[data-baseweb="notification"][kind="error"]    { background: var(--red-100) !important;   border-left: 4px solid var(--red-600) !important; }
 
-.stProgress > div > div {
-  background-color: var(--color-light-grey) !important;
+/* ---- Expander — bordered flat card ---- */
+div[data-testid="stExpander"] {
+  background: var(--color-surface) !important;
+  border: var(--border-hairline) !important;
   border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-xs);
+}
+div[data-testid="stExpander"] summary { color: var(--color-text-brand) !important; font-weight: 600 !important; }
+div[data-testid="stExpander"] summary:hover { color: var(--navy-900) !important; }
+
+/* ---- Tabs — navy active, blue indicator ---- */
+.stTabs [data-baseweb="tab-list"] { gap: var(--space-4); border-bottom: 1px solid var(--color-border); }
+.stTabs [data-baseweb="tab"] { color: var(--color-text-secondary); font-weight: 500; }
+.stTabs [aria-selected="true"] { color: var(--color-text-brand) !important; }
+.stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] { background: var(--blue-600) !important; }
+
+/* ---- Progress — flat blue on grey track ---- */
+.stProgress > div > div > div { background: var(--blue-500) !important; border-radius: var(--radius-pill) !important; height: 8px !important; }
+.stProgress > div > div { background: var(--grey-100) !important; border-radius: var(--radius-pill) !important; }
+
+/* ---- Plotly charts — hairline-bordered surface ---- */
+.js-plotly-plot, [data-testid="stPlotlyChart"] {
+  border: var(--border-hairline);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+  background: var(--white);
+  padding: var(--space-2);
 }
 
-/* Plotly Charts Enhancement */
-.js-plotly-plot {
-  border-radius: var(--radius-lg) !important;
-  box-shadow: var(--shadow-base) !important;
-  background: var(--color-white) !important;
-  padding: var(--space-4) !important;
-  margin: var(--space-6) 0 !important;
-  border: 1px solid #E5E7EB;
+/* ---- Dataframe — clean neutral grid (theme handles header/borders) ---- */
+[data-testid="stDataFrame"] { border-radius: var(--radius-md); overflow: hidden; }
+
+/* ---- Data-source logos (TMD / NOAA) — calm, capped so they don't
+   dominate when the header columns stack on mobile ---- */
+[data-testid="stImage"] img {
+  border-radius: var(--radius-sm);
+  max-height: 84px !important;
+  width: auto !important;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Sidebar (if used) */
-section[data-testid="stSidebar"] {
-  background: linear-gradient(180deg, var(--color-navy-blue) 0%, var(--color-dark-navy) 100%) !important;
-  padding: var(--space-6) !important;
-}
+/* ---- Footer ---- */
+.app-footer, .main > div:last-child p { color: var(--color-text-muted); }
 
-section[data-testid="stSidebar"] * {
-  color: var(--color-white) !important;
-}
+/* ---- Focus visibility (accessibility) ---- */
+*:focus-visible { outline: 2px solid var(--blue-500) !important; outline-offset: 2px !important; }
 
-/* Logo container enhancement */
-.main img {
-  filter: drop-shadow(var(--shadow-sm));
-  transition: transform var(--transition-base);
-}
-
-.main img:hover {
-  transform: scale(1.05);
-}
-
-/* Footer */
-.main > div:last-child {
-  margin-top: var(--space-12);
-  padding-top: var(--space-8);
-  border-top: 2px solid var(--color-light-grey);
-}
-
-/* Columns spacing */
-div[data-testid="column"] {
-  padding: 0 var(--space-2) !important;
-}
-
-/* Material Icons/Symbols Support */
-/* Ensure Material Icons are loaded and styled properly */
-.material-icons,
-.material-symbols-outlined,
-[data-testid="stIconMaterial"],
-span[aria-label$=" icon"][role="img"],
-span[data-icon],
-[class*="material"] {
-  font-family: 'Material Symbols Outlined', 'Material Icons' !important;
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  font-feature-settings: 'liga' !important;
-}
-
-/* Material Icons Enhancement */
-span[data-testid="stMarkdownContainer"] span[class*="material"] {
-  color: var(--color-light-blue);
-  vertical-align: middle;
-  margin-right: var(--space-1);
-}
-
-/* Responsive adjustments */
+/* ---- Responsive ---- */
 @media (max-width: 768px) {
-  h1 {
-    font-size: 2rem !important;
-  }
-  
-  h2 {
-    font-size: 1.5rem !important;
-  }
-  
-  h3 {
-    font-size: 1.25rem !important;
-  }
-  
-  .main {
-    padding: var(--space-4) var(--space-3);
-  }
+  .block-container { padding-left: var(--space-4); padding-right: var(--space-4); }
+  h1 { font-size: 1.75rem !important; }
+  h2 { font-size: 1.3rem !important; }
+  h3 { font-size: 1.2rem !important; }
 }
 
-/* Subtle animation for page load */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.main > div {
-  animation: fadeInUp 0.5s ease-out;
-}
-
-/* Accessibility - Focus states */
-*:focus-visible {
-  outline: 2px solid var(--color-light-blue) !important;
-  outline-offset: 2px !important;
-}
-
-/* Respect reduced motion preference */
+/* ---- Respect reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }

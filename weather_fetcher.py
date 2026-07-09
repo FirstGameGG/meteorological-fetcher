@@ -23,13 +23,17 @@ ONI_SOURCE_URL = "https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/ens
 # regardless of the current working directory it is launched from.
 STATIONS_FILE = Path(__file__).resolve().parent / "stations.json"
 
+# Bank of Thailand-harmonized categorical palette. Validated with the dataviz
+# skill (Machado-2009 CVD, --pairs all on a white surface): worst pair ΔE 12.3,
+# above the ≥12 target. Colour is a secondary cue here — the map/legend/hover
+# also carry the region name.
 REGION_COLORS = {
-    "ภาคเหนือ": "#1f77b4",
-    "ภาคตะวันออกเฉียงเหนือ": "#ff7f0e",
-    "ภาคตะวันตก": "#2ca02c",
-    "ภาคกลาง": "#d62728",
-    "ภาคตะวันออก": "#9467bd",
-    "ภาคใต้": "#8c564b",
+    "ภาคเหนือ": "#1f7fd6",              # blue-500
+    "ภาคตะวันออกเฉียงเหนือ": "#a97c1f",  # gold-600
+    "ภาคตะวันตก": "#2a7d4f",            # green-600
+    "ภาคกลาง": "#c0342a",              # red-600
+    "ภาคตะวันออก": "#4a3aa7",           # violet
+    "ภาคใต้": "#1a9e8f",               # teal
 }
 
 

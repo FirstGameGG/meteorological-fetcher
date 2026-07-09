@@ -9,7 +9,12 @@ import streamlit as st
 from plotly.subplots import make_subplots
 
 from data_processing import build_monthly_weather_dataframe, merge_oni_labels, to_excel
-from ui_components import render_region_selector, render_station_selector
+from ui_components import (
+    render_region_selector,
+    render_station_selector,
+    style_bot_fig,
+    style_bot_map,
+)
 from weather_fetcher import REGION_COLORS, fetch_oni_data, fetch_stations_parallel, load_stations
 
 MIN_STATION_THRESHOLD = 3
@@ -136,6 +141,8 @@ with header_container:
             st.image(str(BASE_DIR / "assets" / "TMD.png"), width="stretch")
         with logo_col2:
             st.image(str(BASE_DIR / "assets" / "NOAA.png"), width="stretch")
+
+st.divider()
 
 # --- Station data loading ---
 try:
@@ -305,43 +312,63 @@ if st.button("ประมวลผลและทำความสะอาด
 
         with tab_overview:
             st.markdown("#### สถิติภูมิอากาศและดัชนี ONI รายเดือน")
+            st.caption(
+                "แต่ละแผงใช้แกนเวลาเดียวกัน (Small multiples) เลื่อนดูช่วงเวลาได้จากแถบด้านล่าง "
+                "และชี้เมาส์เพื่อเทียบค่าฝน อุณหภูมิ และดัชนี ONI ในเดือนเดียวกัน"
+            )
             try:
-                fig = make_subplots(specs=[[{"secondary_y": True}]])
+                has_oni = "ONI_Index" in df_monthly.columns
+                if has_oni and "ONI_Label" not in df_monthly.columns:
+                    df_monthly["ONI_Label"] = "ไม่สามารถจัดประเภทได้"
+
+                panel_titles = ["ปริมาณฝนรวม (mm)", "อุณหภูมิเฉลี่ย (°C)"]
+                if has_oni:
+                    panel_titles.append("ดัชนี ONI (เอลนีโญ / ลานีญา)")
+                rows = len(panel_titles)
+
+                fig = make_subplots(
+                    rows=rows,
+                    cols=1,
+                    shared_xaxes=True,
+                    vertical_spacing=0.08,
+                    subplot_titles=panel_titles,
+                )
 
                 fig.add_trace(
                     go.Scatter(
                         x=df_monthly["year_month"],
                         y=df_monthly["prcp_sum"],
                         name="ปริมาณฝน (mm)",
-                        fill="tozeroy",
                         mode="lines",
-                        line=dict(color="rgba(0, 150, 255, 0.7)", width=2),
+                        fill="tozeroy",
+                        line=dict(color="#1f7fd6", width=2),
+                        fillcolor="rgba(31, 127, 214, 0.16)",
                     ),
-                    secondary_y=False,
+                    row=1,
+                    col=1,
                 )
-
                 fig.add_trace(
                     go.Scatter(
                         x=df_monthly["year_month"],
                         y=df_monthly["temp_mean"],
                         name="อุณหภูมิเฉลี่ย (°C)",
                         mode="lines",
-                        line=dict(color="orange", width=2),
+                        line=dict(color="#a97c1f", width=2),
                     ),
-                    secondary_y=True,
+                    row=2,
+                    col=1,
                 )
-
-                if "ONI_Index" in df_monthly.columns:
-                    if "ONI_Label" not in df_monthly.columns:
-                        df_monthly["ONI_Label"] = "ไม่สามารถจัดประเภทได้"
-
+                if has_oni:
+                    # El Niño (+0.5) / La Niña (−0.5) reference thresholds
+                    fig.add_hline(y=0.5, line=dict(color="#c0342a", width=1, dash="dash"), opacity=0.4, row=3, col=1)
+                    fig.add_hline(y=-0.5, line=dict(color="#2a7d4f", width=1, dash="dash"), opacity=0.4, row=3, col=1)
                     fig.add_trace(
                         go.Scatter(
                             x=df_monthly["year_month"],
                             y=df_monthly["ONI_Index"],
                             name="ดัชนี ONI",
                             mode="lines",
-                            line=dict(color="red", width=2, dash="dot"),
+                            line=dict(color="#c0342a", width=2, dash="dot"),
                             customdata=df_monthly[["ONI_Label"]].values,
                             hovertemplate=(
                                 "เดือน: %{x}<br>"
@@ -349,19 +376,22 @@ if st.button("ประมวลผลและทำความสะอาด
                                 "ผลการจัดประเภท: %{customdata[0]}<extra></extra>"
                             ),
                         ),
-                        secondary_y=True,
+                        row=3,
+                        col=1,
                     )
 
                 fig.update_layout(
-                    template="plotly_white",
-                    title="สถิติสภาพอากาศรายเดือนเทียบดัชนี ONI",
+                    height=560 if has_oni else 420,
                     hovermode="x unified",
-                    height=520,
-                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                    showlegend=False,
+                    title="สถิติสภาพอากาศรายเดือนเทียบดัชนี ONI",
                 )
-                fig.update_yaxes(title_text="ปริมาณฝน (mm)", secondary_y=False)
-                fig.update_yaxes(title_text="อุณหภูมิ / ดัชนี ONI", secondary_y=True)
-                fig.update_xaxes(rangeslider=dict(visible=True))
+                fig.update_yaxes(title_text="mm", row=1, col=1)
+                fig.update_yaxes(title_text="°C", row=2, col=1)
+                if has_oni:
+                    fig.update_yaxes(title_text="ONI", row=3, col=1)
+                fig.update_xaxes(rangeslider=dict(visible=True, thickness=0.06), row=rows, col=1)
+                style_bot_fig(fig)
 
                 st.plotly_chart(fig, width="stretch")
             except Exception as e:
@@ -394,7 +424,8 @@ if st.button("ประมวลผลและทำความสะอาด
                         "station_label": "สถานี",
                     },
                 )
-                fig_station_temp.update_layout(template="plotly_white", legend_title_text="สถานี")
+                fig_station_temp.update_layout(legend_title_text="สถานี")
+                style_bot_fig(fig_station_temp, colorway=True)
                 st.plotly_chart(fig_station_temp, width="stretch")
 
                 st.markdown("#### แนวโน้มปริมาณฝนรายวันแยกตามสถานี")
@@ -410,7 +441,8 @@ if st.button("ประมวลผลและทำความสะอาด
                         "station_label": "สถานี",
                     },
                 )
-                fig_station_prcp.update_layout(template="plotly_white", legend_title_text="สถานี")
+                fig_station_prcp.update_layout(legend_title_text="สถานี")
+                style_bot_fig(fig_station_prcp, colorway=True)
                 st.plotly_chart(fig_station_prcp, width="stretch")
 
                 station_summary = (
@@ -461,6 +493,7 @@ if st.button("ประมวลผลและทำความสะอาด
                     map_style="open-street-map",
                     margin={"r": 0, "t": 0, "l": 0, "b": 0},
                 )
+                style_bot_map(fig_map)
                 st.plotly_chart(fig_map, width="stretch")
             else:
                 st.info("ไม่มีสถานีที่สืบค้นสำเร็จสำหรับแสดงบนแผนที่")
@@ -521,7 +554,7 @@ if st.button("ประมวลผลและทำความสะอาด
 
 st.markdown("---")
 st.markdown(
-    "<div style='text-align: center; color: gray; font-size: 0.9em;'>"
+    "<div class='app-footer' style='text-align: center; color: #6d7580; font-size: 0.9em;'>"
     "เว็บไซต์นี้ไม่ใช่เว็บไซต์อย่างเป็นทางการของหน่วยงานรัฐ (Disclaimer: This is not an official website)"
     "</div>",
     unsafe_allow_html=True,

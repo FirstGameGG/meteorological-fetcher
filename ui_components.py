@@ -4,6 +4,51 @@ from typing import Any, Dict, List, Tuple
 
 import streamlit as st
 
+# --- Bank of Thailand chart theme -------------------------------------------
+BOT_FONT = "Sarabun, 'Noto Sans Thai', 'Segoe UI', system-ui, sans-serif"
+_BOT_GRID = "#e3e6ea"   # grey-200 hairline
+_BOT_ZERO = "#ced2d8"   # grey-300
+_BOT_AXIS = "#545c66"   # grey-700
+_BOT_INK = "#23282e"    # grey-900
+_BOT_BRAND = "#0f2a52"  # navy-800
+
+# Many-series colorway for station-level charts (BOT-leaning; cycles past 10).
+BOT_COLORWAY = [
+    "#1f7fd6", "#a97c1f", "#2a7d4f", "#c0342a", "#4a3aa7",
+    "#1a9e8f", "#1c4a80", "#5bb8e8", "#6d7580", "#14345f",
+]
+
+
+def style_bot_fig(fig, *, colorway: bool = False):
+    """Apply the BOT chart look to a cartesian Plotly figure (font, white
+    surface, grey-200 hairline gridlines, grey-700 axis ink)."""
+    fig.update_layout(
+        font=dict(family=BOT_FONT, size=13, color=_BOT_AXIS),
+        title_font=dict(family=BOT_FONT, size=16, color=_BOT_BRAND),
+        paper_bgcolor="#ffffff",
+        plot_bgcolor="#ffffff",
+        legend=dict(font=dict(family=BOT_FONT, size=12, color=_BOT_INK), bgcolor="rgba(255,255,255,0)"),
+        hoverlabel=dict(font=dict(family=BOT_FONT, size=12)),
+        margin=dict(l=56, r=24, t=56, b=40),
+    )
+    if colorway:
+        fig.update_layout(colorway=BOT_COLORWAY)
+    fig.update_xaxes(gridcolor=_BOT_GRID, zerolinecolor=_BOT_ZERO, linecolor=_BOT_GRID,
+                     tickfont=dict(family=BOT_FONT, color=_BOT_AXIS), title_font=dict(family=BOT_FONT, color=_BOT_AXIS))
+    fig.update_yaxes(gridcolor=_BOT_GRID, zerolinecolor=_BOT_ZERO, linecolor=_BOT_GRID,
+                     tickfont=dict(family=BOT_FONT, color=_BOT_AXIS), title_font=dict(family=BOT_FONT, color=_BOT_AXIS))
+    return fig
+
+
+def style_bot_map(fig):
+    """Lighter theme for map figures (no cartesian axes)."""
+    fig.update_layout(
+        font=dict(family=BOT_FONT, size=13, color=_BOT_AXIS),
+        legend=dict(font=dict(family=BOT_FONT, size=12, color=_BOT_INK)),
+        hoverlabel=dict(font=dict(family=BOT_FONT, size=12)),
+    )
+    return fig
+
 
 def render_region_selector(region_colors: Dict[str, str]) -> List[str]:
     all_regions = list(region_colors.keys())
